@@ -18,22 +18,22 @@ impl Resources {
         }
     }
 
-    fn to_earn_gold(&mut self) {
+    fn earn_gold(&mut self) {
         println!("The character ventures out to earn gold.");
         self.gold += 1;
     }
 
-    fn to_gather_food(&mut self) {
+    fn gather_food(&mut self) {
         println!("The character seeks to gather food.");
         self.food += 1;
     }
 
-    fn to_fell_trees(&mut self) {
+    fn fell_trees(&mut self) {
         println!("The character is going to chop wood.");
         self.wood += 1;
     }
 
-    fn to_collect_energy(&mut self) {
+    fn collect_energy(&mut self) {
         println!("The character sets out to collect energy.");
         self.energy += 1;
     }
@@ -41,7 +41,11 @@ impl Resources {
 
 impl fmt::Display for Resources {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "gold: {}\nfood: {}\nwood: {}\nenergy: {}", self.gold, self.food, self.wood, self.energy)
+        write!(
+            f,
+            "gold: {}\nfood: {}\nwood: {}\nenergy: {}",
+            self.gold, self.food, self.wood, self.energy
+        )
     }
 }
 
@@ -63,19 +67,17 @@ fn main() {
         let line = line.unwrap();
 
         match line.trim().parse() {
-            Ok(n) => {
-                match n {
-                    0 => print_help(),
-                    1 => println!("{}", resources),
-                    2 => resources.to_earn_gold(),
-                    3 => resources.to_gather_food(),
-                    4 => resources.to_fell_trees(),
-                    5 => resources.to_collect_energy(),
-                    9 => break,
-                    _ => {},
-                }
+            Ok(n) => match n {
+                0 => print_help(),
+                1 => println!("{resources}"),
+                2 => resources.earn_gold(),
+                3 => resources.gather_food(),
+                4 => resources.fell_trees(),
+                5 => resources.collect_energy(),
+                9 => break,
+                _ => {}
             },
-            Err(e) => println!("{}", e),
+            Err(e) => println!("{e}"),
         }
         print_prompt();
     }

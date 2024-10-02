@@ -1,0 +1,22 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - name: Build BIN
+        run: |
+          rustup target add x86_64-unknown-linux-musl
+          cargo build --release --target=x86_64-unknown-linux-musl
+      - name: Release
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2
+        with:
+          files: |
+            target/x86_64-unknown-linux-musl/release/rusty-kingdom

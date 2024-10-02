@@ -1,0 +1,40 @@
+name: Test
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Format
+        run: cargo fmt --check
+      - name: cargo fix
+        run: |
+          cargo fix
+          git diff --exit-code
+      - name: cargo fix edition
+        run: |
+          cargo fix --edition
+          git diff --exit-code
+      - name: cargo clippy
+        run: |
+          cargo clippy -- --deny warnings
+          cargo clippy --release -- --deny warnings
+          cargo clippy -- --deny clippy::pedantic
+          cargo clippy --release -- --deny clippy::pedantic
+      - name: Build
+        run: |
+          cargo build
+          cargo build --release
+      - name: Run tests
+        run: cargo test
+      - name: Run benchs
+        run: cargo bench
