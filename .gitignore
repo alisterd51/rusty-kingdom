@@ -19,3 +19,6 @@ target/
 # Added by cargo
 
 /target
+
+# game save
+save.json

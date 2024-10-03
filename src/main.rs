@@ -1,6 +1,14 @@
-use core::fmt;
-use std::io::{self, stdin, Write};
+#![forbid(unsafe_code)]
 
+use std::{
+    fs,
+    io::{self, stdin, Write},
+};
+
+use serde::{Deserialize, Serialize};
+use serde_json::{from_str, json};
+
+#[derive(Deserialize, Serialize, Debug)]
 struct Fortress {
     gold: i32,
     food: i32,
@@ -18,6 +26,10 @@ impl Fortress {
             energy: 0,
             farm_level: 1,
         }
+    }
+
+    fn print_stats(&self) {
+        println!("{:?}", *self);
     }
 
     fn use_energy(&mut self, cost: i32) -> Result<(), ()> {
@@ -72,15 +84,24 @@ impl Fortress {
             self.farm_level += 1;
         }
     }
-}
 
-impl fmt::Display for Fortress {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "gold: {}\nfood: {}\nwood: {}\nenergy: {}",
-            self.gold, self.food, self.wood, self.energy
-        )
+    fn save(&self) {
+        let fortress = json!(self);
+
+        if fs::write("save.json", fortress.to_string()).is_ok() {
+            println!("save success");
+        } else {
+            println!("save failed");
+        }
+    }
+
+    fn load(&mut self) {
+        if let Ok(data) = fs::read_to_string("save.json") {
+            if let Ok(fortress) = from_str::<Fortress>(&data) {
+                *self = fortress;
+                println!("Load successful!");
+            }
+        }
     }
 }
 
@@ -90,7 +111,7 @@ fn print_prompt() {
 }
 
 fn print_help() {
-    println!("0: help\n1: stats\n2: to earn gold\n3: to gather food\n4: to fell trees\n5: to collect energy\n6: \n7: improve farm\n9: exit");
+    println!("0: help\n1: stats\n2: to earn gold\n3: to gather food\n4: to fell trees\n5: to collect energy\n6: \n7: improve farm\n9: exit\n10: save game\n11: load game");
 }
 
 fn main() {
@@ -104,13 +125,15 @@ fn main() {
         match line.trim().parse() {
             Ok(n) => match n {
                 0 => print_help(),
-                1 => println!("{fortress}"),
+                1 => fortress.print_stats(),
                 2 => fortress.earn_gold(),
                 3 => fortress.gather_food(),
                 4 => fortress.fell_trees(),
                 5 => fortress.collect_energy(),
                 7 => fortress.improve_farm(),
                 9 => break,
+                10 => fortress.save(),
+                11 => fortress.load(),
                 _ => {}
             },
             Err(e) => println!("{e}"),
