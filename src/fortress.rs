@@ -25,6 +25,14 @@ impl Building {
     }
 }
 
+fn default_buildings() -> HashMap<String, Building> {
+    HashMap::from([
+        ("farm".to_string(), Building::from("farm")),
+        ("sawmill".to_string(), Building::from("sawmill")),
+        ("sanctuary".to_string(), Building::from("sanctuary")),
+    ])
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Fortress {
     gold: i32,
@@ -41,11 +49,7 @@ impl Fortress {
             food: 0,
             wood: 0,
             energy: 0,
-            buildings: HashMap::from([
-                ("farm".to_string(), Building::from("farm")),
-                ("sawmill".to_string(), Building::from("sawmill")),
-                ("sanctuary".to_string(), Building::from("sanctuary")),
-            ]),
+            buildings: default_buildings(),
         }
     }
 
@@ -129,6 +133,9 @@ impl Fortress {
         if let Ok(data) = fs::read_to_string(save_path) {
             if let Ok(fortress) = from_str::<Fortress>(&data) {
                 *self = fortress;
+                for building in default_buildings() {
+                    self.buildings.entry(building.0).or_insert(building.1);
+                }
                 println!("Load successful!");
             } else {
                 println!("Backup data recovery failed");
@@ -282,5 +289,43 @@ mod tests {
         assert_eq!(fortress.buildings["sanctuary"].level, 2);
         assert_eq!(fortress.buildings["sawmill"].name, "super sawmill");
         assert_eq!(fortress.buildings["sawmill"].level, 3);
+    }
+
+    #[test]
+    fn test_load_incomplete_save_0() {
+        let mut fortress = Fortress::new();
+        let data = r#"{"buildings":{"farm":{"level":42,"name":"super farm"}},"energy":4,"food":2,"gold":1,"wood":3}"#;
+        assert!(fs::write("test-incomplete-save-0.json", data).is_ok());
+        fortress.load("test-incomplete-save-0.json");
+        assert!(fs::remove_file("test-incomplete-save-0.json").is_ok());
+        assert_eq!(fortress.gold, 1);
+        assert_eq!(fortress.food, 2);
+        assert_eq!(fortress.wood, 3);
+        assert_eq!(fortress.energy, 4);
+        assert_eq!(fortress.buildings["farm"].name, "super farm");
+        assert_eq!(fortress.buildings["farm"].level, 42);
+        assert_eq!(fortress.buildings["sanctuary"].name, "sanctuary");
+        assert_eq!(fortress.buildings["sanctuary"].level, 1);
+        assert_eq!(fortress.buildings["sawmill"].name, "sawmill");
+        assert_eq!(fortress.buildings["sawmill"].level, 1);
+    }
+
+    #[test]
+    fn test_load_incomplete_save_1() {
+        let mut fortress = Fortress::new();
+        let data = r#"{"buildings":{},"energy":4,"food":2,"gold":1,"wood":3}"#;
+        assert!(fs::write("test-incomplete-save-1.json", data).is_ok());
+        fortress.load("test-incomplete-save-1.json");
+        assert!(fs::remove_file("test-incomplete-save-1.json").is_ok());
+        assert_eq!(fortress.gold, 1);
+        assert_eq!(fortress.food, 2);
+        assert_eq!(fortress.wood, 3);
+        assert_eq!(fortress.energy, 4);
+        assert_eq!(fortress.buildings["farm"].name, "farm");
+        assert_eq!(fortress.buildings["farm"].level, 1);
+        assert_eq!(fortress.buildings["sanctuary"].name, "sanctuary");
+        assert_eq!(fortress.buildings["sanctuary"].level, 1);
+        assert_eq!(fortress.buildings["sawmill"].name, "sawmill");
+        assert_eq!(fortress.buildings["sawmill"].level, 1);
     }
 }
