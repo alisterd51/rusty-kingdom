@@ -4,5 +4,12 @@ version = "0.4.1"
 edition = "2021"
 
 [dependencies]
+axum = "0.7.7"
+deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
+diesel = { version = "2.2.4", features = ["postgres"] }
+log = "0.4.22"
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
+tokio = { version = "1.40.0", features = ["macros", "rt-multi-thread"]}
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
