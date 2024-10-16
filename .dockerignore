@@ -1,0 +1,10 @@
+.github/
+target/
+.dockerignore
+.env
+.gitignore
+compose.yaml
+Containerfile*
+diesel.toml
+LICENSE
+sample.env

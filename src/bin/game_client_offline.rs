@@ -1,8 +1,5 @@
-#![forbid(unsafe_code)]
-
-mod fortress;
-
 use fortress::Fortress;
+use rusty_kingdom::fortress;
 use std::io::{self, stdin, Write};
 
 fn print_prompt() {
