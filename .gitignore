@@ -22,3 +22,9 @@ target/
 
 # game save
 save.json
+
+# secrets
+.env
+
+# diesel
+diesel.toml

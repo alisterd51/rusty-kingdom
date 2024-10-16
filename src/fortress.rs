@@ -42,7 +42,14 @@ pub struct Fortress {
     buildings: HashMap<String, Building>,
 }
 
+impl Default for Fortress {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Fortress {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             gold: 0,

@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - rusty-network
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  migration:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: runtime-migration
+    environment:
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}"
+    networks:
+      - rusty-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+  crud_server:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: runtime-crud_server
+    environment:
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}"
+    ports:
+      - "3000:3000"
+    networks:
+      - rusty-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+
+networks:
+  rusty-network:
+    external: false
