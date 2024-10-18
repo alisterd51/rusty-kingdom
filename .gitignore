@@ -22,3 +22,6 @@ target/
 
 # game save
 save.json
+
+# secrets
+.env
