@@ -1,7 +1,7 @@
 use super::internal_error;
 use crate::{
     models::{Fortress, NewFortress, UpdateFortress},
-    schema::fortresses,
+    schema::{buildings, fortresses},
 };
 use axum::{
     extract::{Path, State},
@@ -97,6 +97,15 @@ pub async fn delete(
     Path(id): Path<i32>,
 ) -> Result<Json<usize>, (StatusCode, String)> {
     let conn = pool.get().await.map_err(internal_error)?;
+    let _ = conn
+        .interact(move |conn| {
+            diesel::delete(buildings::table)
+                .filter(buildings::fortress_id.eq(id))
+                .execute(conn)
+        })
+        .await
+        .map_err(internal_error)?
+        .map_err(internal_error)?;
     let res = conn
         .interact(move |conn| {
             diesel::delete(fortresses::table)

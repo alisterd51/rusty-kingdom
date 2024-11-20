@@ -31,6 +31,10 @@ async fn main() {
             "/api/fortress/:fortress_id/building",
             get(handler::building::get_by_fortress),
         )
+        .route(
+            "/api/fortress/:fortress_id/building",
+            delete(handler::building::delete_by_fortress),
+        )
         .with_state(pool);
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     let tcp_listener = TcpListener::bind(addr).await.unwrap();
