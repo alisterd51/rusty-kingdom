@@ -1,7 +1,7 @@
-use axum::http::StatusCode;
-
 pub mod building;
 pub mod fortress;
+
+use axum::http::StatusCode;
 
 fn internal_error<E>(err: E) -> (StatusCode, String)
 where

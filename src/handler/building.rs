@@ -127,3 +127,23 @@ pub async fn delete(
         .map_err(internal_error)?;
     Ok(Json(res))
 }
+
+/// # Errors
+///
+/// Will return `Err` if the delete failed.
+pub async fn delete_by_fortress(
+    State(pool): State<deadpool_diesel::postgres::Pool>,
+    Path(fortress_id): Path<i32>,
+) -> Result<Json<usize>, (StatusCode, String)> {
+    let conn = pool.get().await.map_err(internal_error)?;
+    let res = conn
+        .interact(move |conn| {
+            diesel::delete(buildings::table)
+                .filter(buildings::fortress_id.eq(fortress_id))
+                .execute(conn)
+        })
+        .await
+        .map_err(internal_error)?
+        .map_err(internal_error)?;
+    Ok(Json(res))
+}
