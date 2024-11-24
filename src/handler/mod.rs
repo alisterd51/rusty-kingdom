@@ -1,5 +1,6 @@
 pub mod building;
 pub mod fortress;
+pub mod game;
 
 use axum::http::StatusCode;
 

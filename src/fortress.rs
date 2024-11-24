@@ -20,7 +20,7 @@ impl Building {
         self.level += 1;
     }
 
-    pub fn level(&self) -> i32 {
+    pub const fn level(&self) -> i32 {
         self.level
     }
 }
@@ -138,7 +138,7 @@ impl Fortress {
 
     pub fn load(&mut self, save_path: &str) {
         if let Ok(data) = fs::read_to_string(save_path) {
-            if let Ok(fortress) = from_str::<Fortress>(&data) {
+            if let Ok(fortress) = from_str::<Self>(&data) {
                 *self = fortress;
                 for building in default_buildings() {
                     self.buildings.entry(building.0).or_insert(building.1);

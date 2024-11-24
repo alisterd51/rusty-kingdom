@@ -1,6 +1,6 @@
-FROM rust:1.82-bookworm AS build-common
+FROM rust:1.83-bookworm AS build-common
 
-RUN apt-get update && apt-get install -y libpq-dev
+RUN apt-get update && apt-get install -y libpq-dev libssl-dev
 
 COPY . .
 
@@ -12,18 +12,32 @@ FROM build-common AS build-crud_server
 
 RUN  cargo build --release --bin=crud_server
 
-FROM debian:bookworm-slim AS runtime-common
+FROM build-common AS build-game_server
+
+RUN  cargo build --release --bin=game_server
+
+FROM debian:bookworm-slim AS runtime-common-libpq
 
 RUN apt-get update && apt-get install -y libpq-dev
 
-FROM runtime-common AS runtime-migration
+FROM debian:bookworm-slim AS runtime-common-libssl
+
+RUN apt-get update && apt-get install -y libssl-dev
+
+FROM runtime-common-libpq AS runtime-migration
 
 COPY --from=build-migration /target/release/migration /migration
 
 CMD [ "/migration" ]
 
-FROM runtime-common AS runtime-crud_server
+FROM runtime-common-libpq AS runtime-crud_server
 
 COPY --from=build-crud_server /target/release/crud_server /crud_server
 
 CMD [ "/crud_server" ]
+
+FROM runtime-common-libssl AS runtime-game_server
+
+COPY --from=build-game_server /target/release/game_server /game_server
+
+CMD [ "/game_server" ]

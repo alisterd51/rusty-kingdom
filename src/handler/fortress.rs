@@ -51,13 +51,13 @@ pub async fn get_all(
 /// Will return `Err` if the get failed.
 pub async fn get(
     State(pool): State<deadpool_diesel::postgres::Pool>,
-    Path(id): Path<i32>,
+    Path(fortress_id): Path<i32>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
     let conn = pool.get().await.map_err(internal_error)?;
     let res = conn
         .interact(move |conn| {
             fortresses::table
-                .filter(fortresses::id.eq(id))
+                .filter(fortresses::id.eq(fortress_id))
                 .get_result(conn)
         })
         .await
@@ -71,14 +71,14 @@ pub async fn get(
 /// Will return `Err` if the update failed.
 pub async fn patch(
     State(pool): State<deadpool_diesel::postgres::Pool>,
-    Path(id): Path<i32>,
+    Path(fortress_id): Path<i32>,
     Json(update_building): Json<UpdateFortress>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
     let conn = pool.get().await.map_err(internal_error)?;
     let res = conn
         .interact(move |conn| {
             diesel::update(fortresses::table)
-                .filter(fortresses::id.eq(id))
+                .filter(fortresses::id.eq(fortress_id))
                 .set(update_building)
                 .returning(Fortress::as_returning())
                 .get_result(conn)
@@ -94,13 +94,13 @@ pub async fn patch(
 /// Will return `Err` if the delete failed.
 pub async fn delete(
     State(pool): State<deadpool_diesel::postgres::Pool>,
-    Path(id): Path<i32>,
+    Path(fortress_id): Path<i32>,
 ) -> Result<Json<usize>, (StatusCode, String)> {
     let conn = pool.get().await.map_err(internal_error)?;
     let _ = conn
         .interact(move |conn| {
             diesel::delete(buildings::table)
-                .filter(buildings::fortress_id.eq(id))
+                .filter(buildings::fortress_id.eq(fortress_id))
                 .execute(conn)
         })
         .await
@@ -109,7 +109,7 @@ pub async fn delete(
     let res = conn
         .interact(move |conn| {
             diesel::delete(fortresses::table)
-                .filter(fortresses::id.eq(id))
+                .filter(fortresses::id.eq(fortress_id))
                 .execute(conn)
         })
         .await

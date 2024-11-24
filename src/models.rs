@@ -2,7 +2,7 @@ use crate::schema::{buildings, fortresses};
 use diesel::prelude::*;
 
 #[derive(
-    serde::Serialize, serde::Deserialize, Queryable, Identifiable, Selectable, Debug, PartialEq,
+    serde::Serialize, serde::Deserialize, Queryable, Identifiable, Selectable, Debug, PartialEq, Eq,
 )]
 #[diesel(table_name = fortresses)]
 pub struct Fortress {
@@ -40,6 +40,7 @@ pub struct UpdateFortress {
     Associations,
     Debug,
     PartialEq,
+    Eq,
 )]
 #[diesel(belongs_to(Fortress))]
 #[diesel(table_name = buildings)]

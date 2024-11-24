@@ -4,6 +4,8 @@ use rusty_kingdom::{
     request,
 };
 
+pub const API_URL: &str = "http://localhost:3000";
+
 async fn test_fortress(client: &Client) -> Result<(), reqwest::Error> {
     println!("test fortress api:");
     {
@@ -14,10 +16,10 @@ async fn test_fortress(client: &Client) -> Result<(), reqwest::Error> {
             wood: 0,
             energy: 0,
         };
-        let fortress = request::fortress::post(client, &new_fortress).await?;
+        let fortress = request::fortress::post(client, API_URL, &new_fortress).await?;
         println!("{fortress:#?}");
         println!("test fortress get");
-        let fortress = request::fortress::get(client, fortress.id).await?;
+        let fortress = request::fortress::get(client, API_URL, fortress.id).await?;
         println!("{fortress:#?}");
         println!("test fortress patch");
         let update_fortress = UpdateFortress {
@@ -26,10 +28,11 @@ async fn test_fortress(client: &Client) -> Result<(), reqwest::Error> {
             wood: None,
             energy: Some(42),
         };
-        let fortress = request::fortress::patch(client, fortress.id, &update_fortress).await?;
+        let fortress =
+            request::fortress::patch(client, API_URL, fortress.id, &update_fortress).await?;
         println!("{fortress:#?}");
         println!("test fortress delete");
-        let res = request::fortress::delete(client, fortress.id).await?;
+        let res = request::fortress::delete(client, API_URL, fortress.id).await?;
         println!("{res:#?}");
     }
     {
@@ -39,13 +42,17 @@ async fn test_fortress(client: &Client) -> Result<(), reqwest::Error> {
             wood: 0,
             energy: 0,
         };
-        let fortress_0_id = request::fortress::post(client, &new_fortress).await?.id;
-        let fortress_1_id = request::fortress::post(client, &new_fortress).await?.id;
+        let fortress_0_id = request::fortress::post(client, API_URL, &new_fortress)
+            .await?
+            .id;
+        let fortress_1_id = request::fortress::post(client, API_URL, &new_fortress)
+            .await?
+            .id;
         println!("test fortress get_all");
-        let fortresses = request::fortress::get_all(client).await?;
+        let fortresses = request::fortress::get_all(client, API_URL).await?;
         println!("{fortresses:#?}");
-        let _ = request::fortress::delete(client, fortress_0_id).await?;
-        let _ = request::fortress::delete(client, fortress_1_id).await?;
+        let _ = request::fortress::delete(client, API_URL, fortress_0_id).await?;
+        let _ = request::fortress::delete(client, API_URL, fortress_1_id).await?;
     }
     Ok(())
 }
@@ -58,7 +65,9 @@ async fn test_building(client: &Client) -> Result<(), reqwest::Error> {
         wood: 0,
         energy: 0,
     };
-    let fortress_id = request::fortress::post(client, &new_fortress).await?.id;
+    let fortress_id = request::fortress::post(client, API_URL, &new_fortress)
+        .await?
+        .id;
     {
         println!("test building post");
         let new_building = NewBuilding {
@@ -66,10 +75,10 @@ async fn test_building(client: &Client) -> Result<(), reqwest::Error> {
             level: 0,
             fortress_id,
         };
-        let building = request::building::post(client, &new_building).await?;
+        let building = request::building::post(client, API_URL, &new_building).await?;
         println!("{building:#?}");
         println!("test building get");
-        let building = request::building::get(client, building.id).await?;
+        let building = request::building::get(client, API_URL, building.id).await?;
         println!("{building:#?}");
         println!("test building patch");
         let update_building = UpdateBuilding {
@@ -77,10 +86,11 @@ async fn test_building(client: &Client) -> Result<(), reqwest::Error> {
             level: Some(42),
             fortress_id: None,
         };
-        let building = request::building::patch(client, building.id, &update_building).await?;
+        let building =
+            request::building::patch(client, API_URL, building.id, &update_building).await?;
         println!("{building:#?}");
         println!("test building delete");
-        let res = request::building::delete(client, building.id).await?;
+        let res = request::building::delete(client, API_URL, building.id).await?;
         println!("{res:#?}");
     }
     {
@@ -89,13 +99,13 @@ async fn test_building(client: &Client) -> Result<(), reqwest::Error> {
             level: 0,
             fortress_id,
         };
-        let _ = request::building::post(client, &new_building).await?;
-        let _ = request::building::post(client, &new_building).await?;
+        let _ = request::building::post(client, API_URL, &new_building).await?;
+        let _ = request::building::post(client, API_URL, &new_building).await?;
         println!("test building get_by_fortress");
-        let buildings = request::building::get_by_fortress(client, fortress_id).await?;
+        let buildings = request::building::get_by_fortress(client, API_URL, fortress_id).await?;
         println!("{buildings:#?}");
         println!("test building delete_by_fortress");
-        let res = request::building::delete_by_fortress(client, fortress_id).await?;
+        let res = request::building::delete_by_fortress(client, API_URL, fortress_id).await?;
         println!("{res:#?}");
     }
     {
@@ -104,13 +114,13 @@ async fn test_building(client: &Client) -> Result<(), reqwest::Error> {
             level: 0,
             fortress_id,
         };
-        let _ = request::building::post(client, &new_building).await?;
-        let _ = request::building::post(client, &new_building).await?;
+        let _ = request::building::post(client, API_URL, &new_building).await?;
+        let _ = request::building::post(client, API_URL, &new_building).await?;
         println!("test building get_all");
-        let buildings = request::building::get_all(client).await?;
+        let buildings = request::building::get_all(client, API_URL).await?;
         println!("{buildings:#?}");
     }
-    let _ = request::fortress::delete(client, fortress_id).await?;
+    let _ = request::fortress::delete(client, API_URL, fortress_id).await?;
     Ok(())
 }
 
