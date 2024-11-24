@@ -40,6 +40,17 @@ services:
         condition: service_healthy
       migration:
         condition: service_completed_successfully
+  game_server:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: runtime-game_server
+    environment:
+      CRUD_SERVER_URL: "http://crud_server:3000"
+    ports:
+      - "8080:3000"
+    networks:
+      - rusty-network
 
 networks:
   rusty-network:

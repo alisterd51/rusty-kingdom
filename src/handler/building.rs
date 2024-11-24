@@ -50,13 +50,13 @@ pub async fn get_all(
 /// Will return `Err` if the get failed.
 pub async fn get(
     State(pool): State<deadpool_diesel::postgres::Pool>,
-    Path(id): Path<i32>,
+    Path(building_id): Path<i32>,
 ) -> Result<Json<Building>, (StatusCode, String)> {
     let conn = pool.get().await.map_err(internal_error)?;
     let res = conn
         .interact(move |conn| {
             buildings::table
-                .filter(buildings::id.eq(id))
+                .filter(buildings::id.eq(building_id))
                 .get_result(conn)
         })
         .await
@@ -90,14 +90,14 @@ pub async fn get_by_fortress(
 /// Will return `Err` if the update failed.
 pub async fn patch(
     State(pool): State<deadpool_diesel::postgres::Pool>,
-    Path(id): Path<i32>,
+    Path(building_id): Path<i32>,
     Json(update_building): Json<UpdateBuilding>,
 ) -> Result<Json<Building>, (StatusCode, String)> {
     let conn = pool.get().await.map_err(internal_error)?;
     let res = conn
         .interact(move |conn| {
             diesel::update(buildings::table)
-                .filter(buildings::id.eq(id))
+                .filter(buildings::id.eq(building_id))
                 .set(update_building)
                 .returning(Building::as_returning())
                 .get_result(conn)
@@ -113,13 +113,13 @@ pub async fn patch(
 /// Will return `Err` if the delete failed.
 pub async fn delete(
     State(pool): State<deadpool_diesel::postgres::Pool>,
-    Path(id): Path<i32>,
+    Path(building_id): Path<i32>,
 ) -> Result<Json<usize>, (StatusCode, String)> {
     let conn = pool.get().await.map_err(internal_error)?;
     let res = conn
         .interact(move |conn| {
             diesel::delete(buildings::table)
-                .filter(buildings::id.eq(id))
+                .filter(buildings::id.eq(building_id))
                 .execute(conn)
         })
         .await
