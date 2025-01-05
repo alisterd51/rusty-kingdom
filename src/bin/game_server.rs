@@ -9,56 +9,56 @@ async fn main() {
         .route("/api/fortress", get(handler::game::fortress_get_all))
         .route("/api/fortress/new", get(handler::game::fortress_new))
         .route(
-            "/api/fortress/:fortress_id",
+            "/api/fortress/{fortress_id}",
             get(handler::game::fortress_get),
         )
         .route(
-            "/api/fortress/:fortress_id",
+            "/api/fortress/{fortress_id}",
             delete(handler::game::fortress_delete),
         )
         .route(
-            "/api/fortress/:fortress_id/gold",
+            "/api/fortress/{fortress_id}/gold",
             get(handler::game::fortress_gold_get),
         )
         .route(
-            "/api/fortress/:fortress_id/gold/collect",
+            "/api/fortress/{fortress_id}/gold/collect",
             get(handler::game::fortress_gold_collect),
         )
         .route(
-            "/api/fortress/:fortress_id/food",
+            "/api/fortress/{fortress_id}/food",
             get(handler::game::fortress_food_get),
         )
         .route(
-            "/api/fortress/:fortress_id/food/collect",
+            "/api/fortress/{fortress_id}/food/collect",
             get(handler::game::fortress_food_collect),
         )
         .route(
-            "/api/fortress/:fortress_id/wood",
+            "/api/fortress/{fortress_id}/wood",
             get(handler::game::fortress_wood_get),
         )
         .route(
-            "/api/fortress/:fortress_id/wood/collect",
+            "/api/fortress/{fortress_id}/wood/collect",
             get(handler::game::fortress_wood_collect),
         )
         .route(
-            "/api/fortress/:fortress_id/energy",
+            "/api/fortress/{fortress_id}/energy",
             get(handler::game::fortress_energy_get),
         )
         .route(
-            "/api/fortress/:fortress_id/energy/collect",
+            "/api/fortress/{fortress_id}/energy/collect",
             get(handler::game::fortress_energy_collect),
         )
         .route(
-            "/api/fortress/:fortress_id/building",
+            "/api/fortress/{fortress_id}/building",
             get(handler::game::fortress_building_get_all),
         )
         .route("/api/building", get(handler::game::building_get_all))
         .route(
-            "/api/building/:building_id",
+            "/api/building/{building_id}",
             get(handler::game::building_get),
         )
         .route(
-            "/api/building/:building_id/improve",
+            "/api/building/{building_id}/improve",
             get(handler::game::building_improve),
         );
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
