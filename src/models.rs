@@ -1,8 +1,17 @@
 use crate::schema::{buildings, fortresses};
 use diesel::prelude::*;
+use utoipa::ToSchema;
 
 #[derive(
-    serde::Serialize, serde::Deserialize, Queryable, Identifiable, Selectable, Debug, PartialEq, Eq,
+    serde::Serialize,
+    serde::Deserialize,
+    Queryable,
+    Identifiable,
+    Selectable,
+    Debug,
+    PartialEq,
+    Eq,
+    ToSchema,
 )]
 #[diesel(table_name = fortresses)]
 pub struct Fortress {
@@ -41,6 +50,7 @@ pub struct UpdateFortress {
     Debug,
     PartialEq,
     Eq,
+    ToSchema,
 )]
 #[diesel(belongs_to(Fortress))]
 #[diesel(table_name = buildings)]

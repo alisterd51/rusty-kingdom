@@ -6,6 +6,20 @@
 docker compose up --build
 ```
 
+## Endpoints
+
+### Game server
+
+OpenApi:
+
+<http://localhost:8080/swagger-ui>
+
+### Crud server
+
+OpenApi:
+
+<http://localhost:3000/swagger-ui>
+
 ### client crud (curl)
 
 fortress

@@ -19,32 +19,32 @@ async fn main() {
     let app = Router::new()
         .route("/api/building", get(handler::building::get_all))
         .route("/api/building", post(handler::building::post))
-        .route("/api/building/:building_id", get(handler::building::get))
+        .route("/api/building/{building_id}", get(handler::building::get))
         .route(
-            "/api/building/:building_id",
+            "/api/building/{building_id}",
             patch(handler::building::patch),
         )
         .route(
-            "/api/building/:building_id",
+            "/api/building/{building_id}",
             delete(handler::building::delete),
         )
         .route("/api/fortress", get(handler::fortress::get_all))
         .route("/api/fortress", post(handler::fortress::post))
-        .route("/api/fortress/:fortress_id", get(handler::fortress::get))
+        .route("/api/fortress/{fortress_id}", get(handler::fortress::get))
         .route(
-            "/api/fortress/:fortress_id",
+            "/api/fortress/{fortress_id}",
             patch(handler::fortress::patch),
         )
         .route(
-            "/api/fortress/:fortress_id",
+            "/api/fortress/{fortress_id}",
             delete(handler::fortress::delete),
         )
         .route(
-            "/api/fortress/:fortress_id/building",
+            "/api/fortress/{fortress_id}/building",
             get(handler::building::get_by_fortress),
         )
         .route(
-            "/api/fortress/:fortress_id/building",
+            "/api/fortress/{fortress_id}/building",
             delete(handler::building::delete_by_fortress),
         )
         .with_state(pool);

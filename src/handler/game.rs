@@ -6,9 +6,20 @@ use crate::{
 use axum::{extract::Path, Json};
 use reqwest::StatusCode;
 
+const FORTRESS_TAG: &str = "fortress";
+const BUILDING_TAG: &str = "building";
+
 /// # Errors
 ///
 /// Will return `Err` if the get failed.
+#[utoipa::path(
+    get,
+    path = "",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "List all fortress", body = [Fortress])
+    )
+)]
 pub async fn fortress_get_all() -> Result<Json<Vec<Fortress>>, (StatusCode, String)> {
     let client = reqwest::Client::new();
     let api_url = std::env::var("CRUD_SERVER_URL").map_err(internal_error)?;
@@ -21,6 +32,14 @@ pub async fn fortress_get_all() -> Result<Json<Vec<Fortress>>, (StatusCode, Stri
 /// # Errors
 ///
 /// Will return `Err` if the post failed.
+#[utoipa::path(
+    get,
+    path = "/new",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "Create new fortress", body = Fortress)
+    )
+)]
 pub async fn fortress_new() -> Result<Json<Fortress>, (StatusCode, String)> {
     let client = reqwest::Client::new();
     let api_url = std::env::var("CRUD_SERVER_URL").map_err(internal_error)?;
@@ -39,6 +58,14 @@ pub async fn fortress_new() -> Result<Json<Fortress>, (StatusCode, String)> {
 /// # Errors
 ///
 /// Will return `Err` if the get failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "Get one fortress", body = Fortress)
+    )
+)]
 pub async fn fortress_get(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
@@ -53,6 +80,14 @@ pub async fn fortress_get(
 /// # Errors
 ///
 /// Will return `Err` if the delete failed.
+#[utoipa::path(
+    delete,
+    path = "/{fortress_id}",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "Delete one fortress", body = usize)
+    )
+)]
 pub async fn fortress_delete(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<usize>, (StatusCode, String)> {
@@ -67,6 +102,14 @@ pub async fn fortress_delete(
 /// # Errors
 ///
 /// Will return `Err` if the get failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}/gold",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "get gold of fortress", body = i32)
+    )
+)]
 pub async fn fortress_gold_get(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<i32>, (StatusCode, String)> {
@@ -81,6 +124,14 @@ pub async fn fortress_gold_get(
 /// # Errors
 ///
 /// Will return `Err` if the get or patch failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}/gold/collect",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "Collect more gold", body = Fortress)
+    )
+)]
 pub async fn fortress_gold_collect(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
@@ -105,6 +156,14 @@ pub async fn fortress_gold_collect(
 /// # Errors
 ///
 /// Will return `Err` if the get failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}/food",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "get food of fortress", body = i32)
+    )
+)]
 pub async fn fortress_food_get(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<i32>, (StatusCode, String)> {
@@ -119,6 +178,14 @@ pub async fn fortress_food_get(
 /// # Errors
 ///
 /// Will return `Err` if the get or patch failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}/food/collect",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "Collect more food", body = Fortress)
+    )
+)]
 pub async fn fortress_food_collect(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
@@ -143,6 +210,14 @@ pub async fn fortress_food_collect(
 /// # Errors
 ///
 /// Will return `Err` if the get failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}/wood",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "get wood of fortress", body = i32)
+    )
+)]
 pub async fn fortress_wood_get(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<i32>, (StatusCode, String)> {
@@ -157,6 +232,14 @@ pub async fn fortress_wood_get(
 /// # Errors
 ///
 /// Will return `Err` if the get or patch failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}/wood/collect",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "Collect more wood", body = Fortress)
+    )
+)]
 pub async fn fortress_wood_collect(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
@@ -181,6 +264,14 @@ pub async fn fortress_wood_collect(
 /// # Errors
 ///
 /// Will return `Err` if the get failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}/energy",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "get energy of fortress", body = i32)
+    )
+)]
 pub async fn fortress_energy_get(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<i32>, (StatusCode, String)> {
@@ -195,6 +286,14 @@ pub async fn fortress_energy_get(
 /// # Errors
 ///
 /// Will return `Err` if the get or patch failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}/energy/collect",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "Collect more energy", body = Fortress)
+    )
+)]
 pub async fn fortress_energy_collect(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
@@ -219,6 +318,14 @@ pub async fn fortress_energy_collect(
 /// # Errors
 ///
 /// Will return `Err` if the get failed.
+#[utoipa::path(
+    get,
+    path = "/{fortress_id}/building",
+    tag = FORTRESS_TAG,
+    responses(
+        (status = 200, description = "Get all building on fortress", body = [Building])
+    )
+)]
 pub async fn fortress_building_get_all(
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<Vec<Building>>, (StatusCode, String)> {
@@ -233,6 +340,14 @@ pub async fn fortress_building_get_all(
 /// # Errors
 ///
 /// Will return `Err` if the get failed.
+#[utoipa::path(
+    get,
+    path = "",
+    tag = BUILDING_TAG,
+    responses(
+        (status = 200, description = "List all building", body = [Building])
+    )
+)]
 pub async fn building_get_all() -> Result<Json<Vec<Building>>, (StatusCode, String)> {
     let client = reqwest::Client::new();
     let api_url = std::env::var("CRUD_SERVER_URL").map_err(internal_error)?;
@@ -245,6 +360,14 @@ pub async fn building_get_all() -> Result<Json<Vec<Building>>, (StatusCode, Stri
 /// # Errors
 ///
 /// Will return `Err` if the get failed.
+#[utoipa::path(
+    get,
+    path = "/{building_id}",
+    tag = BUILDING_TAG,
+    responses(
+        (status = 200, description = "Get one building", body = Building)
+    )
+)]
 pub async fn building_get(
     Path(building_id): Path<i32>,
 ) -> Result<Json<Building>, (StatusCode, String)> {
@@ -259,6 +382,14 @@ pub async fn building_get(
 /// # Errors
 ///
 /// Will return `Err` if the get or patch failed.
+#[utoipa::path(
+    get,
+    path = "/{building_id}/improve",
+    tag = BUILDING_TAG,
+    responses(
+        (status = 200, description = "Improve one building", body = Building)
+    )
+)]
 pub async fn building_improve(
     Path(building_id): Path<i32>,
 ) -> Result<Json<Building>, (StatusCode, String)> {
