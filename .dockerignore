@@ -1,10 +1,9 @@
-.github/
-target/
+/target
 .dockerignore
 .env
 .gitignore
 compose.yaml
-Containerfile*
-diesel.toml
+Containerfile
 LICENSE
+README.md
 sample.env
