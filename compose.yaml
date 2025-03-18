@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     networks:
       - rusty-network
+    # ports:
+    #   - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
       interval: 5s
@@ -16,7 +18,7 @@ services:
     build:
       context: .
       dockerfile: Containerfile
-      target: runtime-migration
+      target: runtime-rusty-migration
     environment:
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}"
     networks:
@@ -28,11 +30,11 @@ services:
     build:
       context: .
       dockerfile: Containerfile
-      target: runtime-crud_server
+      target: runtime-rusty-crud-server
     environment:
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}"
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"
     networks:
       - rusty-network
     depends_on:
@@ -44,7 +46,7 @@ services:
     build:
       context: .
       dockerfile: Containerfile
-      target: runtime-game_server
+      target: runtime-rusty-game-server
     environment:
       CRUD_SERVER_URL: "http://crud_server:3000"
     ports:

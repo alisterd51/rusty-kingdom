@@ -1,14 +1,14 @@
 use super::internal_error;
-use crate::{
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
+use diesel::{ExpressionMethods, RunQueryDsl, SelectableHelper, query_dsl::methods::FilterDsl};
+use rusty::{
     models::{Fortress, NewFortress, UpdateFortress},
     schema::{buildings, fortresses},
 };
-use axum::{
-    extract::{Path, State},
-    http::StatusCode,
-    Json,
-};
-use diesel::{query_dsl::methods::FilterDsl, ExpressionMethods, RunQueryDsl, SelectableHelper};
 
 /// # Errors
 ///
