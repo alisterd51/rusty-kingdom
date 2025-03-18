@@ -1,0 +1,13 @@
+[package]
+name = "rusty-game-server"
+version = "0.5.1"
+edition = "2024"
+
+[dependencies]
+rusty = { path = "../rusty" }
+axum.workspace = true
+reqwest.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

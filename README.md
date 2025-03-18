@@ -1,55 +1,38 @@
 # Rusty Kingdom
 
+Rusty Kingdom est un jeu de gestion avec quelques subtilités :
+
+- il a été conçu pour être un [jeu incrémental](https://en.wikipedia.org/wiki/Incremental_game) mais pourrait évoluer vers d'autres genres de jeux.
+- Tous les composants de base sont écrits en Rust afin de pouvoir supporter une très forte charge.
+- Les joueurs sont incités à écrire leur propre client et leurs propres bots pour interagir avec le serveur de jeu.
+- Le client par défaut est une CLI, cependant le jeu doit pouvoir être compatible avec n'importe quel type de client, notamment :
+  - Script ([bash](https://www.gnu.org/software/bash/) + [curl](https://curl.se/))
+  - Binaire ([Rust](https://www.rust-lang.org/) + [Reqwest](https://github.com/seanmonstar/reqwest))
+  - Webapp ([HTML](https://developer.mozilla.org/fr/docs/Web/HTML) + [CSS](https://developer.mozilla.org/fr/docs/Web/CSS) + [JS](https://developer.mozilla.org/fr/docs/Web/JavaScript))
+
 ## Start
 
+### Docker compose
+
 ```bash
-docker compose up --build
+# Create `.env` file
+cp sample.env .env
+
+# Run app
+docker compose pull
+docker compose build
+docker compose up -d
 ```
 
-### client crud (curl)
-
-fortress
+### Kubernetes
 
 ```bash
-$ curl -X POST http://localhost:3000/api/fortress
-    -H 'Content-Type: application/json'
-    -d '{"gold":0,"food":0,"wood":0,"energy":0}'
-{"id":1,"gold":0,"food":0,"wood":0,"energy":0}
-
-$ curl -X GET http://localhost:3000/api/fortress
-[{"id":1,"gold":0,"food":0,"wood":0,"energy":0}]
-
-$ curl -X GET http://localhost:3000/api/fortress/1
-{"id":1,"gold":0,"food":0,"wood":0,"energy":0}
-
-$ curl -X PATCH http://localhost:3000/api/fortress/1
-    -H 'Content-Type: application/json'
-    -d '{"energy":42}'
-{"id":1,"gold":0,"food":0,"wood":0,"energy":42}
-
-$ curl -X DELETE http://localhost:3000/api/fortress/1
-1
+# TODO
 ```
 
-building
+## Test Game API
 
 ```bash
-$ curl -X POST http://localhost:3000/api/building
-   -H 'Content-Type: application/json'
-   -d '{"name":"new building","level":1,"fortress_id":1}'
-{"id":1,"name":"new building","level":1,"fortress_id":1}
-
-$ curl -X GET http://localhost:3000/api/building
-[{"id":1,"name":"new building","level":1,"fortress_id":1}]
-
-$ curl -X GET http://localhost:3000/api/building/1
-{"id":1,"name":"new building","level":1,"fortress_id":1}
-
-$ curl -X PATCH http://localhost:3000/api/building/1
-    -H 'Content-Type: application/json'
-    -d '{"level":42}'
-{"id":1,"name":"new building","level":42,"fortress_id":1}
-
-$ curl -X DELETE http://localhost:3000/api/building/1
-1
+cargo build --release --bin rusty-game-client
+./target/release/rusty-game-client --help
 ```
