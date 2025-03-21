@@ -1,13 +1,14 @@
 use super::internal_error;
-use crate::{
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
+use diesel::{ExpressionMethods, RunQueryDsl, SelectableHelper, query_dsl::methods::FilterDsl};
+use rusty::{
     models::{Building, NewBuilding, UpdateBuilding},
     schema::buildings,
 };
-use axum::{
-    extract::{Json, Path, State},
-    http::StatusCode,
-};
-use diesel::{query_dsl::methods::FilterDsl, ExpressionMethods, RunQueryDsl, SelectableHelper};
 
 /// # Errors
 ///
