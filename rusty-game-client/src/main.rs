@@ -1,5 +1,7 @@
-use clap::{Parser, Subcommand};
+use clap::{Command, CommandFactory, Parser, Subcommand};
+use clap_complete::{Generator, Shell, generate};
 use rusty::request::game;
+use std::io;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -18,24 +20,54 @@ struct Args {
 
 #[derive(Subcommand, Debug, Clone)]
 enum Commands {
-    Bench { size: usize },
-    GetAllFortress,
-    NewFortress,
-    GetFortress { fortress_id: i32 },
-    DeleteFortress { fortress_id: i32 },
-    GetGoldByFortress { fortress_id: i32 },
-    CollectGoldByFortress { fortress_id: i32 },
-    GetFoodByFortress { fortress_id: i32 },
-    CollectFoodByFortress { fortress_id: i32 },
-    GetWoodByFortress { fortress_id: i32 },
-    CollectWoodByFortress { fortress_id: i32 },
-    GetEnergyByFortress { fortress_id: i32 },
-    CollectEnergyByFortress { fortress_id: i32 },
-    GetAllBuildingsByFortress { fortress_id: i32 },
-    GetAllBuildings,
-    GetBuilding { building_id: i32 },
-    ImproveBuilding { building_id: i32 },
-    GetImproveBuildingCosts { building_id: i32 },
+    Fortress {
+        #[command(subcommand)]
+        cmd: FortressCommands,
+    },
+    Building {
+        #[command(subcommand)]
+        cmd: BuildingCommands,
+    },
+    Bench {
+        size: usize,
+    },
+    Completions {
+        shell: Shell,
+    },
+}
+
+#[derive(Subcommand, Debug, Clone)]
+enum BuildingCommands {
+    GetAll,
+    Get { building_id: i32 },
+    Improve { building_id: i32 },
+    GetImproveCosts { building_id: i32 },
+}
+
+#[derive(Subcommand, Debug, Clone)]
+enum FortressCommands {
+    GetAll,
+    New,
+    Get { fortress_id: i32 },
+    Delete { fortress_id: i32 },
+    GetGold { fortress_id: i32 },
+    CollectGold { fortress_id: i32 },
+    GetFood { fortress_id: i32 },
+    CollectFood { fortress_id: i32 },
+    GetWood { fortress_id: i32 },
+    CollectWood { fortress_id: i32 },
+    GetEnergy { fortress_id: i32 },
+    CollectEnergy { fortress_id: i32 },
+    GetAllBuildings { fortress_id: i32 },
+}
+
+fn print_completions<G: Generator>(generator: G, cmd: &mut Command) {
+    generate(
+        generator,
+        cmd,
+        cmd.get_name().to_string(),
+        &mut io::stdout(),
+    );
 }
 
 #[tokio::main]
@@ -44,6 +76,84 @@ async fn main() -> Result<(), String> {
     let client = reqwest::Client::new();
 
     match args.cmd {
+        Commands::Fortress { cmd } => match cmd {
+            FortressCommands::GetAll => {
+                let fortresses = game::fortress::get_all(&client, &args.url).await?;
+                println!("{fortresses:?}");
+            }
+            FortressCommands::New => {
+                let response = game::fortress::new(&client, &args.url).await?;
+                println!("{response:?}");
+            }
+            FortressCommands::Get { fortress_id } => {
+                let fortress = game::fortress::get(&client, &args.url, fortress_id).await?;
+                println!("{fortress:?}");
+            }
+            FortressCommands::Delete { fortress_id } => {
+                let fortress = game::fortress::delete(&client, &args.url, fortress_id).await?;
+                println!("{fortress:?}");
+            }
+            FortressCommands::GetGold { fortress_id } => {
+                let gold = game::fortress::gold_get(&client, &args.url, fortress_id).await?;
+                println!("{gold:?}");
+            }
+            FortressCommands::CollectGold { fortress_id } => {
+                let fortress =
+                    game::fortress::gold_collect(&client, &args.url, fortress_id).await?;
+                println!("{fortress:?}");
+            }
+            FortressCommands::GetFood { fortress_id } => {
+                let food = game::fortress::food_get(&client, &args.url, fortress_id).await?;
+                println!("{food:?}");
+            }
+            FortressCommands::CollectFood { fortress_id } => {
+                let fortress =
+                    game::fortress::food_collect(&client, &args.url, fortress_id).await?;
+                println!("{fortress:?}");
+            }
+            FortressCommands::GetWood { fortress_id } => {
+                let food = game::fortress::wood_get(&client, &args.url, fortress_id).await?;
+                println!("{food:?}");
+            }
+            FortressCommands::CollectWood { fortress_id } => {
+                let fortress =
+                    game::fortress::wood_collect(&client, &args.url, fortress_id).await?;
+                println!("{fortress:?}");
+            }
+            FortressCommands::GetEnergy { fortress_id } => {
+                let energy = game::fortress::energy_get(&client, &args.url, fortress_id).await?;
+                println!("{energy:?}");
+            }
+            FortressCommands::CollectEnergy { fortress_id } => {
+                let fortress =
+                    game::fortress::energy_collect(&client, &args.url, fortress_id).await?;
+                println!("{fortress:?}");
+            }
+            FortressCommands::GetAllBuildings { fortress_id } => {
+                let buildings =
+                    game::fortress::building_get_all(&client, &args.url, fortress_id).await?;
+                println!("{buildings:?}");
+            }
+        },
+        Commands::Building { cmd } => match cmd {
+            BuildingCommands::GetAll => {
+                let buildings = game::building::get_all(&client, &args.url).await?;
+                println!("{buildings:?}");
+            }
+            BuildingCommands::Get { building_id } => {
+                let building = game::building::get(&client, &args.url, building_id).await?;
+                println!("{building:?}");
+            }
+            BuildingCommands::Improve { building_id } => {
+                let (fortress, building) =
+                    game::building::improve(&client, &args.url, building_id).await?;
+                println!("{fortress:?} {building:?}");
+            }
+            BuildingCommands::GetImproveCosts { building_id } => {
+                let costs = game::building::improve_costs(&client, &args.url, building_id).await?;
+                println!("{costs:?}");
+            }
+        },
         Commands::Bench { size } => {
             let (fortress, _buildings) = game::fortress::new(&client, &args.url).await?;
             for _ in 0..size {
@@ -53,75 +163,9 @@ async fn main() -> Result<(), String> {
             println!("gold: {gold}");
             game::fortress::delete(&client, &args.url, fortress.id).await?;
         }
-        Commands::GetAllFortress => {
-            let fortresses = game::fortress::get_all(&client, &args.url).await?;
-            println!("{fortresses:?}");
-        }
-        Commands::NewFortress => {
-            let response = game::fortress::new(&client, &args.url).await?;
-            println!("{response:?}");
-        }
-        Commands::GetFortress { fortress_id } => {
-            let fortress = game::fortress::get(&client, &args.url, fortress_id).await?;
-            println!("{fortress:?}");
-        }
-        Commands::DeleteFortress { fortress_id } => {
-            let fortress = game::fortress::delete(&client, &args.url, fortress_id).await?;
-            println!("{fortress:?}");
-        }
-        Commands::GetGoldByFortress { fortress_id } => {
-            let gold = game::fortress::gold_get(&client, &args.url, fortress_id).await?;
-            println!("{gold:?}");
-        }
-        Commands::CollectGoldByFortress { fortress_id } => {
-            let fortress = game::fortress::gold_collect(&client, &args.url, fortress_id).await?;
-            println!("{fortress:?}");
-        }
-        Commands::GetFoodByFortress { fortress_id } => {
-            let food = game::fortress::gold_get(&client, &args.url, fortress_id).await?;
-            println!("{food:?}");
-        }
-        Commands::CollectFoodByFortress { fortress_id } => {
-            let fortress = game::fortress::food_collect(&client, &args.url, fortress_id).await?;
-            println!("{fortress:?}");
-        }
-        Commands::GetWoodByFortress { fortress_id } => {
-            let food = game::fortress::gold_get(&client, &args.url, fortress_id).await?;
-            println!("{food:?}");
-        }
-        Commands::CollectWoodByFortress { fortress_id } => {
-            let fortress = game::fortress::wood_collect(&client, &args.url, fortress_id).await?;
-            println!("{fortress:?}");
-        }
-        Commands::GetEnergyByFortress { fortress_id } => {
-            let energy = game::fortress::gold_get(&client, &args.url, fortress_id).await?;
-            println!("{energy:?}");
-        }
-        Commands::CollectEnergyByFortress { fortress_id } => {
-            let fortress = game::fortress::energy_collect(&client, &args.url, fortress_id).await?;
-            println!("{fortress:?}");
-        }
-        Commands::GetAllBuildingsByFortress { fortress_id } => {
-            let buildings =
-                game::fortress::building_get_all(&client, &args.url, fortress_id).await?;
-            println!("{buildings:?}");
-        }
-        Commands::GetAllBuildings => {
-            let buildings = game::building::get_all(&client, &args.url).await?;
-            println!("{buildings:?}");
-        }
-        Commands::GetBuilding { building_id } => {
-            let building = game::building::get(&client, &args.url, building_id).await?;
-            println!("{building:?}");
-        }
-        Commands::ImproveBuilding { building_id } => {
-            let (fortress, building) =
-                game::building::improve(&client, &args.url, building_id).await?;
-            println!("{fortress:?} {building:?}");
-        }
-        Commands::GetImproveBuildingCosts { building_id } => {
-            let costs = game::building::improve_costs(&client, &args.url, building_id).await?;
-            println!("{costs:?}");
+        Commands::Completions { shell } => {
+            let mut cmd = Args::command();
+            print_completions(shell, &mut cmd);
         }
     }
     Ok(())

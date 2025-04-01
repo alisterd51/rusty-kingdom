@@ -12,6 +12,7 @@ members = [
 [workspace.dependencies]
 axum = "0.8.3"
 clap = { version = "4.5.34", features = ["derive"] }
+clap_complete = "4.5.47"
 diesel = { version = "2.2.8", features = ["postgres"] }
 diesel_migrations = { version = "2.2.0", features = ["postgres"] }
 deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
