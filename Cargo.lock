@@ -1278,7 +1278,7 @@ checksum = "eded382c5f5f786b989652c49544c4877d9f015cc22e145a5ea8ea66c2921cd2"
 
 [[package]]
 name = "rusty"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "diesel",
  "reqwest",
@@ -1287,7 +1287,7 @@ dependencies = [
 
 [[package]]
 name = "rusty-crud-client"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "reqwest",
  "rusty",
@@ -1296,7 +1296,7 @@ dependencies = [
 
 [[package]]
 name = "rusty-crud-server"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "axum",
  "deadpool-diesel",
@@ -1307,18 +1307,19 @@ dependencies = [
 
 [[package]]
 name = "rusty-game-client"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "clap",
  "clap_complete",
  "reqwest",
  "rusty",
+ "serde_json",
  "tokio",
 ]
 
 [[package]]
 name = "rusty-game-server"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "axum",
  "reqwest",
@@ -1328,7 +1329,7 @@ dependencies = [
 
 [[package]]
 name = "rusty-migration"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "diesel",
  "diesel_migrations",
