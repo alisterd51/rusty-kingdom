@@ -1,18 +1,27 @@
-use axum::routing::{delete, get};
+mod handler;
+
+use axum::routing::get;
 use std::net::{Ipv4Addr, SocketAddr};
 use tokio::net::TcpListener;
 
-mod handler;
+#[derive(Clone)]
+struct AppState {
+    api_url: String,
+    client: reqwest::Client,
+}
 
 #[tokio::main]
 async fn main() {
+    let app_state = AppState {
+        api_url: std::env::var("CRUD_SERVER_URL").unwrap(),
+        client: reqwest::Client::new(),
+    };
     let app = axum::Router::new()
         .route("/api/fortress", get(handler::fortress::get_all))
         .route("/api/fortress/new", get(handler::fortress::new))
-        .route("/api/fortress/{fortress_id}", get(handler::fortress::get))
         .route(
             "/api/fortress/{fortress_id}",
-            delete(handler::fortress::delete),
+            get(handler::fortress::get).delete(handler::fortress::delete),
         )
         .route(
             "/api/fortress/{fortress_id}/gold",
@@ -59,7 +68,8 @@ async fn main() {
         .route(
             "/api/building/{building_id}/improve/costs",
             get(handler::building::improve_costs),
-        );
+        )
+        .with_state(app_state);
     let addr = SocketAddr::from((Ipv4Addr::UNSPECIFIED, 3000));
     let tcp_listener = TcpListener::bind(addr).await.unwrap();
     axum::serve(tcp_listener, app).await.unwrap();
