@@ -1,4 +1,5 @@
-use super::{Pool, internal_error};
+use crate::AppState;
+use super::internal_error;
 use axum::{
     Json,
     extract::{Path, State},
@@ -15,10 +16,10 @@ use rusty::{
 ///
 /// Will return `Err` if the insert failed.
 pub async fn post(
-    State(pool): State<Pool>,
+    State(app_state): State<AppState>,
     Json(new_fortress): Json<NewFortress>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
-    let mut conn = pool.get().await.map_err(internal_error)?;
+    let mut conn = app_state.diesel_pool.get().await.map_err(internal_error)?;
     let res = diesel::insert_into(fortresses::table)
         .values(new_fortress)
         .returning(Fortress::as_returning())
@@ -32,9 +33,9 @@ pub async fn post(
 ///
 /// Will return `Err` if the get failed.
 pub async fn get_all(
-    State(pool): State<Pool>,
+    State(app_state): State<AppState>,
 ) -> Result<Json<Vec<Fortress>>, (StatusCode, String)> {
-    let mut conn = pool.get().await.map_err(internal_error)?;
+    let mut conn = app_state.diesel_pool.get().await.map_err(internal_error)?;
     let res = fortresses::table
         .get_results(&mut conn)
         .await
@@ -46,10 +47,10 @@ pub async fn get_all(
 ///
 /// Will return `Err` if the get failed.
 pub async fn get(
-    State(pool): State<Pool>,
+    State(app_state): State<AppState>,
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
-    let mut conn = pool.get().await.map_err(internal_error)?;
+    let mut conn = app_state.diesel_pool.get().await.map_err(internal_error)?;
     let res = fortresses::table
         .filter(fortresses::id.eq(fortress_id))
         .get_result(&mut conn)
@@ -62,11 +63,11 @@ pub async fn get(
 ///
 /// Will return `Err` if the update failed.
 pub async fn patch(
-    State(pool): State<Pool>,
+    State(app_state): State<AppState>,
     Path(fortress_id): Path<i32>,
     Json(update_building): Json<UpdateFortress>,
 ) -> Result<Json<Fortress>, (StatusCode, String)> {
-    let mut conn = pool.get().await.map_err(internal_error)?;
+    let mut conn = app_state.diesel_pool.get().await.map_err(internal_error)?;
     let res = diesel::update(fortresses::table)
         .filter(fortresses::id.eq(fortress_id))
         .set(update_building)
@@ -81,10 +82,10 @@ pub async fn patch(
 ///
 /// Will return `Err` if the delete failed.
 pub async fn delete(
-    State(pool): State<Pool>,
+    State(app_state): State<AppState>,
     Path(fortress_id): Path<i32>,
 ) -> Result<Json<usize>, (StatusCode, String)> {
-    let mut conn = pool.get().await.map_err(internal_error)?;
+    let mut conn = app_state.diesel_pool.get().await.map_err(internal_error)?;
     let _ = diesel::delete(buildings::table)
         .filter(buildings::fortress_id.eq(fortress_id))
         .execute(&mut conn)

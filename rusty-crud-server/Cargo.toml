@@ -9,6 +9,8 @@ axum.workspace = true
 bb8.workspace = true
 diesel.workspace = true
 diesel-async.workspace = true
+redis.workspace = true
+serde_json.workspace = true
 tokio.workspace = true
 
 [lints]
