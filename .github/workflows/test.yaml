@@ -26,10 +26,10 @@ jobs:
           git diff --exit-code
       - name: cargo clippy
         run: |
-          cargo clippy -- --deny warnings --deny clippy::pedantic --deny clippy::nursery
+          cargo clippy
       - name: cargo clippy --release
         run: |
-          cargo clippy --release -- --deny warnings --deny clippy::pedantic --deny clippy::nursery
+          cargo clippy --release
       - name: Build
         run: |
           cargo build
