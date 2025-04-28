@@ -50,7 +50,7 @@ services:
     environment:
       CRUD_SERVER_URL: "http://crud_server:3000"
     ports:
-      - "8080:3000"
+      - "127.0.0.1:8080:3000"
     networks:
       - rusty-network
 

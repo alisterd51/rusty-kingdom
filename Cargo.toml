@@ -9,6 +9,11 @@ members = [
 	"rusty-migration"
 ]
 
+[workspace.package]
+version = "0.6.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+
 [workspace.dependencies]
 axum = "0.8"
 bb8 = "0.8"
@@ -21,6 +26,11 @@ reqwest = { version = "0.12", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.44", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tracing-opentelemetry = "0.30"
+opentelemetry = "0.29"
+opentelemetry-otlp = "0.29"
 
 [workspace.lints.rust]
 warnings = "deny"
