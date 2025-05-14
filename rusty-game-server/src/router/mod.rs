@@ -1,5 +1,9 @@
 use crate::{ApiState, handler};
 use axum::{Router, routing::get};
+#[cfg(feature = "tracing")]
+use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
+#[cfg(feature = "tracing")]
+use tracing::Level;
 
 fn fortress() -> Router<ApiState> {
     Router::new()
@@ -52,11 +56,30 @@ fn api() -> Router<ApiState> {
         .nest("/building", building())
 }
 
+#[cfg(feature = "tracing")]
 pub fn router() -> Router {
     let state = ApiState {
         api_url: std::env::var("CRUD_SERVER_URL").unwrap(),
         client: reqwest::Client::new(),
     };
+    let trace_layer = TraceLayer::new_for_http()
+        .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
+        .on_response(DefaultOnResponse::new().level(Level::INFO));
+
+    Router::new()
+        .nest("/api", api())
+        .layer(trace_layer)
+        .with_state(state)
+        .route("/health", get(handler::health))
+}
+
+#[cfg(not(feature = "tracing"))]
+pub fn router() -> Router {
+    let state = ApiState {
+        api_url: std::env::var("CRUD_SERVER_URL").unwrap(),
+        client: reqwest::Client::new(),
+    };
+
     Router::new()
         .nest("/api", api())
         .with_state(state)
