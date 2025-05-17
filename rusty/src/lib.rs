@@ -75,7 +75,7 @@ pub fn get_costs(level: i32, level_max: i32) -> Costs {
 }
 
 #[must_use]
-pub fn get_gold_bonus(buildings: Vec<Building>) -> i32 {
+pub fn get_gold_bonus(buildings: &[Building]) -> i32 {
     let mut gold_bonus = 0;
 
     for building in buildings {
@@ -87,7 +87,7 @@ pub fn get_gold_bonus(buildings: Vec<Building>) -> i32 {
 }
 
 #[must_use]
-pub fn get_food_bonus(buildings: Vec<Building>) -> i32 {
+pub fn get_food_bonus(buildings: &[Building]) -> i32 {
     let mut food_bonus = 0;
 
     for building in buildings {
@@ -99,7 +99,7 @@ pub fn get_food_bonus(buildings: Vec<Building>) -> i32 {
 }
 
 #[must_use]
-pub fn get_wood_bonus(buildings: Vec<Building>) -> i32 {
+pub fn get_wood_bonus(buildings: &[Building]) -> i32 {
     let mut wood_bonus = 0;
 
     for building in buildings {
@@ -111,7 +111,7 @@ pub fn get_wood_bonus(buildings: Vec<Building>) -> i32 {
 }
 
 #[must_use]
-pub fn get_energy_bonus(buildings: Vec<Building>) -> i32 {
+pub fn get_energy_bonus(buildings: &[Building]) -> i32 {
     let mut energy_bonus = 0;
 
     for building in buildings {

@@ -1,43 +1,32 @@
 mod handler;
+mod router;
+#[cfg(feature = "tracing")]
+mod trace;
 
-use axum::{Router, routing::get};
-use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use std::net::{Ipv4Addr, SocketAddr};
-use tokio::net::TcpListener;
+use tokio::{
+    net::TcpListener,
+    signal::unix::{SignalKind, signal},
+};
+#[cfg(feature = "tracing")]
+use trace::init_tracing_subscriber;
 
 #[tokio::main]
 async fn main() {
-    let database_url = std::env::var("DATABASE_URL").unwrap();
-    let manager =
-        AsyncDieselConnectionManager::<diesel_async::AsyncPgConnection>::new(database_url);
-    let pool = bb8::Pool::builder().build(manager).await.unwrap();
-    let app = Router::new()
-        .route(
-            "/api/building",
-            get(handler::building::get_all).post(handler::building::post),
-        )
-        .route(
-            "/api/building/{building_id}",
-            get(handler::building::get)
-                .patch(handler::building::patch)
-                .delete(handler::building::delete),
-        )
-        .route(
-            "/api/fortress",
-            get(handler::fortress::get_all).post(handler::fortress::post),
-        )
-        .route(
-            "/api/fortress/{fortress_id}",
-            get(handler::fortress::get)
-                .patch(handler::fortress::patch)
-                .delete(handler::fortress::delete),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/building",
-            get(handler::building::get_by_fortress).delete(handler::building::delete_by_fortress),
-        )
-        .with_state(pool);
+    #[cfg(feature = "tracing")]
+    let _guard = init_tracing_subscriber();
+    let router = router::router().await;
     let addr = SocketAddr::from((Ipv4Addr::UNSPECIFIED, 3000));
     let tcp_listener = TcpListener::bind(addr).await.unwrap();
-    axum::serve(tcp_listener, app).await.unwrap();
+    #[cfg(feature = "tracing")]
+    tracing::info!("listening on {}", addr);
+    axum::serve(tcp_listener, router)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .unwrap();
+}
+
+async fn shutdown_signal() {
+    let mut stream = signal(SignalKind::terminate()).unwrap();
+    stream.recv().await;
 }

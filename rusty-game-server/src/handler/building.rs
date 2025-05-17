@@ -1,5 +1,5 @@
 use super::internal_error;
-use crate::AppState;
+use crate::ApiState;
 use axum::{
     Json,
     extract::{Path, State},
@@ -18,7 +18,7 @@ const MAX_BUILDING_LEVEL: i32 = 20;
 ///
 /// Will return `Err` if the get failed.
 pub async fn get_all(
-    State(app_state): State<AppState>,
+    State(app_state): State<ApiState>,
 ) -> Result<Json<Vec<Building>>, (StatusCode, String)> {
     let buildings = crud::building::get_all(&app_state.client, &app_state.api_url)
         .await
@@ -31,7 +31,7 @@ pub async fn get_all(
 /// Will return `Err` if the get failed.
 pub async fn get(
     Path(building_id): Path<i32>,
-    State(app_state): State<AppState>,
+    State(app_state): State<ApiState>,
 ) -> Result<Json<Building>, (StatusCode, String)> {
     let building = crud::building::get(&app_state.client, &app_state.api_url, building_id)
         .await
@@ -44,7 +44,7 @@ pub async fn get(
 /// Will return `Err` if the get or patch failed.
 pub async fn improve(
     Path(building_id): Path<i32>,
-    State(app_state): State<AppState>,
+    State(app_state): State<ApiState>,
 ) -> Result<Json<(Fortress, Building)>, (StatusCode, String)> {
     let building = crud::building::get(&app_state.client, &app_state.api_url, building_id)
         .await
@@ -79,7 +79,7 @@ pub async fn improve(
 
 pub async fn improve_costs(
     Path(building_id): Path<i32>,
-    State(app_state): State<AppState>,
+    State(app_state): State<ApiState>,
 ) -> Result<Json<Costs>, (StatusCode, String)> {
     let building = crud::building::get(&app_state.client, &app_state.api_url, building_id)
         .await

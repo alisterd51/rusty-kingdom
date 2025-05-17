@@ -1,13 +1,37 @@
 [package]
 name = "rusty-game-server"
-version = "0.5.4"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [dependencies]
 rusty = { path = "../rusty" }
 axum.workspace = true
 reqwest.workspace = true
 tokio.workspace = true
+serde.workspace = true
+
+# tracing
+tracing = { workspace = true, optional = true }
+tracing-subscriber = { workspace = true, optional = true }
+tracing-opentelemetry = { workspace = true, optional = true }
+opentelemetry = { workspace = true, optional = true }
+opentelemetry_sdk = { workspace = true, optional = true }
+opentelemetry-otlp = { workspace = true, optional = true }
+tower-http = { workspace = true, optional = true }
+
+[features]
+default = ["tracing"]
+tracing = [
+    "dep:tracing",
+    "dep:tracing-subscriber",
+    "dep:tracing-opentelemetry",
+    "dep:opentelemetry",
+    "dep:opentelemetry_sdk",
+    "dep:opentelemetry-otlp",
+    "dep:tower-http",
+    "axum/tracing",
+]
 
 [lints]
 workspace = true
