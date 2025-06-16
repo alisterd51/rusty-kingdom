@@ -1,76 +1,68 @@
-mod handler;
+pub mod service;
 
-use axum::routing::get;
-use std::net::{Ipv4Addr, SocketAddr};
-use tokio::net::TcpListener;
+#[allow(unused_imports)]
+use crate::{
+    crud::{
+        building_service_client::BuildingServiceClient,
+        fortress_service_client::FortressServiceClient,
+    },
+    game::{
+        building_service_server::BuildingServiceServer,
+        fortress_service_server::FortressServiceServer,
+    },
+    service::{MyBuildingService, MyFortressService},
+};
+use tokio::signal::unix::{SignalKind, signal};
+use tonic::transport::Server;
 
-#[derive(Clone)]
-struct AppState {
-    api_url: String,
-    client: reqwest::Client,
+#[allow(clippy::pedantic)]
+#[allow(clippy::nursery)]
+pub mod common {
+    tonic::include_proto!("common");
+}
+
+#[allow(clippy::pedantic)]
+#[allow(clippy::nursery)]
+pub mod crud {
+    tonic::include_proto!("crud");
+}
+
+#[allow(clippy::pedantic)]
+#[allow(clippy::nursery)]
+pub mod game {
+    tonic::include_proto!("game");
 }
 
 #[tokio::main]
-async fn main() {
-    let app_state = AppState {
-        api_url: std::env::var("CRUD_SERVER_URL").unwrap(),
-        client: reqwest::Client::new(),
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let addr = "[::]:3000".parse()?;
+    let crud_server_url =
+        std::env::var("CRUD_SERVER_URL").map_err(|e| format!("CRUD_SERVER_URL {e}"))?;
+    let crud_building_client = BuildingServiceClient::connect(crud_server_url.clone()).await?;
+    let crud_fortress_client = FortressServiceClient::connect(crud_server_url.clone()).await?;
+
+    let building_service =
+        MyBuildingService::new(crud_building_client.clone(), crud_fortress_client.clone());
+    let fortress_service =
+        MyFortressService::new(crud_building_client.clone(), crud_fortress_client.clone());
+
+    let shutdown_signal = async {
+        let mut sigterm = signal(SignalKind::terminate()).unwrap();
+        let mut sigint = signal(SignalKind::interrupt()).unwrap();
+
+        tokio::select! {
+            _ = sigterm.recv() => {
+            }
+            _ = sigint.recv() => {
+            }
+        }
     };
-    let app = axum::Router::new()
-        .route("/api/fortress", get(handler::fortress::get_all))
-        .route("/api/fortress/new", get(handler::fortress::new))
-        .route(
-            "/api/fortress/{fortress_id}",
-            get(handler::fortress::get).delete(handler::fortress::delete),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/gold",
-            get(handler::fortress::gold_get),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/gold/collect",
-            get(handler::fortress::gold_collect),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/food",
-            get(handler::fortress::food_get),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/food/collect",
-            get(handler::fortress::food_collect),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/wood",
-            get(handler::fortress::wood_get),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/wood/collect",
-            get(handler::fortress::wood_collect),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/energy",
-            get(handler::fortress::energy_get),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/energy/collect",
-            get(handler::fortress::energy_collect),
-        )
-        .route(
-            "/api/fortress/{fortress_id}/building",
-            get(handler::fortress::building_get_all),
-        )
-        .route("/api/building", get(handler::building::get_all))
-        .route("/api/building/{building_id}", get(handler::building::get))
-        .route(
-            "/api/building/{building_id}/improve",
-            get(handler::building::improve),
-        )
-        .route(
-            "/api/building/{building_id}/improve/costs",
-            get(handler::building::improve_costs),
-        )
-        .with_state(app_state);
-    let addr = SocketAddr::from((Ipv4Addr::UNSPECIFIED, 3000));
-    let tcp_listener = TcpListener::bind(addr).await.unwrap();
-    axum::serve(tcp_listener, app).await.unwrap();
+
+    Server::builder()
+        .add_service(BuildingServiceServer::new(building_service))
+        .add_service(FortressServiceServer::new(fortress_service))
+        .serve_with_shutdown(addr, shutdown_signal)
+        .await?;
+
+    Ok(())
 }
