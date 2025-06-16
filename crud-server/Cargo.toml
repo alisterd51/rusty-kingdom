@@ -1,15 +1,18 @@
 [package]
 name = "crud-server"
-version = "0.5.4"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
 rusty = { path = "../rusty" }
-axum.workspace = true
-bb8.workspace = true
-diesel.workspace = true
-diesel-async.workspace = true
+tonic.workspace = true
+tonic-prost.workspace = true
+prost.workspace = true
 tokio.workspace = true
+diesel.workspace = true
+
+[build-dependencies]
+tonic-prost-build.workspace = true
 
 [lints]
 workspace = true

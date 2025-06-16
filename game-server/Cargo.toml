@@ -1,13 +1,17 @@
 [package]
 name = "game-server"
-version = "0.5.4"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
-rusty = { path = "../rusty" }
-axum.workspace = true
-reqwest.workspace = true
+# rusty = { path = "../rusty" }
+tonic.workspace = true
+tonic-prost.workspace = true
+prost.workspace = true
 tokio.workspace = true
+
+[build-dependencies]
+tonic-prost-build.workspace = true
 
 [lints]
 workspace = true
