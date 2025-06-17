@@ -1,11 +1,10 @@
 [package]
 name = "rusty"
-version = "0.5.4"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
 diesel.workspace = true
-reqwest.workspace = true
 serde.workspace = true
 
 [lints]
