@@ -9,18 +9,20 @@ members = [
 	"rusty-migration"
 ]
 
+package.version = "0.6.0"
+package.edition = "2024"
+
 [workspace.dependencies]
-axum = "0.8"
-bb8 = "0.9"
 clap = { version = "4.5", features = ["derive"] }
 clap_complete = "4.5"
-diesel = { version = "2.2", features = ["postgres"] }
-diesel-async = { version = "0.6", features = ["postgres", "bb8"] }
+diesel = { version = "2.2", features = ["postgres", "r2d2"] }
 diesel_migrations = { version = "2.2", features = ["postgres"] }
-reqwest = { version = "0.12", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.46", features = ["full"] }
+tonic = "0.13"
+prost = "0.13"
+tonic-build = "0.13"
 
 [workspace.lints.rust]
 warnings = "deny"
