@@ -2,11 +2,11 @@
 resolver = "3"
 members = [
 	"rusty",
-	"rusty-crud-client",
-	"rusty-crud-server",
-	"rusty-game-client",
-	"rusty-game-server",
-	"rusty-migration"
+	"crud-client",
+	"crud-server",
+	"game-client",
+	"game-server",
+	"migration"
 ]
 
 [workspace.dependencies]

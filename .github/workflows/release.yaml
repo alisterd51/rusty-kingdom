@@ -18,8 +18,8 @@ jobs:
         uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2
         with:
           files: |
-            target/release/rusty-crud-client
-            target/release/rusty-crud-server
-            target/release/rusty-game-client
-            target/release/rusty-game-server
-            target/release/rusty-migration
+            target/release/crud-client
+            target/release/crud-server
+            target/release/game-client
+            target/release/game-server
+            target/release/migration

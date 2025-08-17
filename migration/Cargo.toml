@@ -1,5 +1,5 @@
 [package]
-name = "rusty-migration"
+name = "migration"
 version = "0.5.4"
 edition = "2024"
 

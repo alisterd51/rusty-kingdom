@@ -305,6 +305,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "crud-client"
+version = "0.5.4"
+dependencies = [
+ "reqwest",
+ "rusty",
+ "tokio",
+]
+
+[[package]]
+name = "crud-server"
+version = "0.5.4"
+dependencies = [
+ "axum",
+ "bb8",
+ "diesel",
+ "diesel-async",
+ "rusty",
+ "tokio",
+]
+
+[[package]]
 name = "crypto-common"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -571,6 +592,28 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
+]
+
+[[package]]
+name = "game-client"
+version = "0.5.4"
+dependencies = [
+ "clap",
+ "clap_complete",
+ "reqwest",
+ "rusty",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "game-server"
+version = "0.5.4"
+dependencies = [
+ "axum",
+ "reqwest",
+ "rusty",
+ "tokio",
 ]
 
 [[package]]
@@ -1006,6 +1049,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a282da65faaf38286cf3be983213fcf1d2e2a58700e808f83f4ea9a4804bc0"
 
 [[package]]
+name = "migration"
+version = "0.5.4"
+dependencies = [
+ "diesel",
+ "diesel_migrations",
+]
+
+[[package]]
 name = "migrations_internals"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1437,57 +1488,6 @@ dependencies = [
  "diesel",
  "reqwest",
  "serde",
-]
-
-[[package]]
-name = "rusty-crud-client"
-version = "0.5.4"
-dependencies = [
- "reqwest",
- "rusty",
- "tokio",
-]
-
-[[package]]
-name = "rusty-crud-server"
-version = "0.5.4"
-dependencies = [
- "axum",
- "bb8",
- "diesel",
- "diesel-async",
- "rusty",
- "tokio",
-]
-
-[[package]]
-name = "rusty-game-client"
-version = "0.5.4"
-dependencies = [
- "clap",
- "clap_complete",
- "reqwest",
- "rusty",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "rusty-game-server"
-version = "0.5.4"
-dependencies = [
- "axum",
- "reqwest",
- "rusty",
- "tokio",
-]
-
-[[package]]
-name = "rusty-migration"
-version = "0.5.4"
-dependencies = [
- "diesel",
- "diesel_migrations",
 ]
 
 [[package]]
