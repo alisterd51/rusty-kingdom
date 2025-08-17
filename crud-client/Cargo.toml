@@ -1,14 +1,11 @@
 [package]
-name = "rusty-game-client"
+name = "crud-client"
 version = "0.5.4"
 edition = "2024"
 
 [dependencies]
 rusty = { path = "../rusty" }
-clap.workspace = true
-clap_complete.workspace = true
 reqwest.workspace = true
-serde_json.workspace = true
 tokio.workspace = true
 
 [lints]
