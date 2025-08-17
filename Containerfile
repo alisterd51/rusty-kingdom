@@ -1,7 +1,7 @@
 FROM rust:trixie AS build
 RUN apt-get update && apt-get install -y libpq-dev libssl-dev
 COPY . .
-RUN cargo build --release
+RUN cargo build --release --bin=migration --bin=crud-server --bin=game-server
 
 FROM debian:trixie-slim AS runtime-common-libpq-libssl
 RUN apt-get update && apt-get install -y libpq-dev libssl-dev

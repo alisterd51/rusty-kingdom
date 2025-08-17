@@ -1,8 +1,9 @@
-name: Latest Container Build
+name: Nightly Container Build
 
 on:
-  push:
-    branches: [ "master" ]
+  workflow_dispatch:
+  schedule:
+    - cron: '42 23 * * *'
 
 jobs:
   build:
@@ -39,3 +40,4 @@ jobs:
           push: true
           tags: |
             ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest
+            ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly
