@@ -9,35 +9,26 @@ Rusty Kingdom est un jeu de gestion avec quelques subtilités :
   - Script ([bash](https://www.gnu.org/software/bash/) + [curl](https://curl.se/))
   - Binaire ([Rust](https://www.rust-lang.org/) + [Reqwest](https://github.com/seanmonstar/reqwest))
   - Webapp ([HTML](https://developer.mozilla.org/fr/docs/Web/HTML) + [CSS](https://developer.mozilla.org/fr/docs/Web/CSS) + [JS](https://developer.mozilla.org/fr/docs/Web/JavaScript))
-
   - [gRPC](https://grpc.io/), pourquoi?
     la promesse de gRPC est de pouvoir ecrire une api 5 a 10 fois plus rapide qu'une api REST classique
     si c'est vrai, cela voudrat dire que le seul point limitant restant sera postgrsql
     il reste envisageable d'ajouter un proxy pour permettre a un client d'utiliser une api rest classique. 
 
+## Install
+
+```bash
+wget https://github.com/alisterd51/rusty-kingdom/releases/download/v0.6.2/game-client
+chmod +x ./game-client
+source <(./game-client completions bash)
+./game-client --version
+```
+
 ## Start
 
-### Docker compose
-
 ```bash
-# Create `.env` file
-cp sample.env .env
+# Create your fortress
+./game-client fortress new | jq
 
-# Run app
-docker compose pull
-docker compose build
-docker compose up -d
-```
-
-### Kubernetes
-
-```bash
-# TODO
-```
-
-## Test Game API
-
-```bash
-cargo build --release --bin rusty-game-client
-./target/release/rusty-game-client --help
+# See other commands
+./game-client --help
 ```
