@@ -260,21 +260,27 @@ async fn handle_bench(
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let mut game_building_client = BuildingServiceClient::connect(args.url.clone()).await?;
-    let mut game_fortress_client = FortressServiceClient::connect(args.url.clone()).await?;
 
     match args.cmd {
         Commands::Fortress { cmd } => {
+            let mut game_building_client = BuildingServiceClient::connect(args.url.clone()).await?;
+            let mut game_fortress_client = FortressServiceClient::connect(args.url.clone()).await?;
+
             handle_fortress(&mut game_fortress_client, &mut game_building_client, cmd).await?;
         }
         Commands::Building { cmd } => {
+            let mut game_building_client = BuildingServiceClient::connect(args.url.clone()).await?;
+
             handle_building(&mut game_building_client, cmd).await?;
         }
         Commands::Bench { size } => {
+            let mut game_fortress_client = FortressServiceClient::connect(args.url.clone()).await?;
+
             handle_bench(&mut game_fortress_client, size).await?;
         }
         Commands::Completions { shell } => {
             let mut cmd = Args::command();
+
             print_completions(shell, &mut cmd);
         }
     }
