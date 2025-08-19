@@ -715,10 +715,10 @@ impl FortressService for MyFortressService {
         let energy_bonus = get_energy_bonus(buildings);
         let update_fortress = UpdateFortress {
             id: fortress_id,
-            gold: Some(fortress.energy + 1 + energy_bonus),
+            gold: None,
             food: None,
             wood: None,
-            energy: None,
+            energy: Some(fortress.energy + 1 + energy_bonus),
         };
         let update_fortress_request = crate::crud::UpdateFortressRequest {
             fortress: Some(update_fortress),
