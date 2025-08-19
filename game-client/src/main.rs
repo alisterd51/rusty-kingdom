@@ -34,7 +34,7 @@ struct Args {
         short,
         long,
         value_name = "SERVER_URL",
-        default_value = "http://localhost:8080"
+        default_value = "https://rusty.anclarma.fr"
     )]
     url: String,
 }

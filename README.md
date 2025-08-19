@@ -12,12 +12,12 @@ Rusty Kingdom est un jeu de gestion avec quelques subtilités :
   - [gRPC](https://grpc.io/), pourquoi?
     la promesse de gRPC est de pouvoir ecrire une api 5 a 10 fois plus rapide qu'une api REST classique
     si c'est vrai, cela voudrat dire que le seul point limitant restant sera postgrsql
-    il reste envisageable d'ajouter un proxy pour permettre a un client d'utiliser une api rest classique. 
+    il reste envisageable d'ajouter un proxy pour permettre a un client d'utiliser une api rest classique.
 
 ## Install
 
 ```bash
-wget https://github.com/alisterd51/rusty-kingdom/releases/download/v0.6.2/game-client
+wget https://github.com/alisterd51/rusty-kingdom/releases/download/v0.6.3/game-client
 chmod +x ./game-client
 source <(./game-client completions bash)
 ./game-client --version
