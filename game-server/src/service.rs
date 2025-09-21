@@ -6,9 +6,7 @@ use crate::{
         fortress_service_client::FortressServiceClient,
     },
     game::{
-        CollectFortressEnergyRequest, CollectFortressEnergyResponse, CollectFortressFoodRequest,
-        CollectFortressFoodResponse, CollectFortressGoldRequest, CollectFortressGoldResponse,
-        CollectFortressWoodRequest, CollectFortressWoodResponse, CreateFortressRequest,
+        CollectFortressRequest, CollectFortressResponse, CreateFortressRequest,
         CreateFortressResponse, DeleteFortressRequest, DeleteFortressResponse, GetBuildingRequest,
         GetBuildingResponse, GetFortressEnergyRequest, GetFortressEnergyResponse,
         GetFortressFoodRequest, GetFortressFoodResponse, GetFortressGoldRequest,
@@ -79,50 +77,6 @@ fn get_costs(level: i32, level_max: i32) -> Costs {
         wood: cost / 5,
         energy: cost / 10,
     }
-}
-
-fn get_gold_bonus(buildings: Vec<Building>) -> i32 {
-    let mut gold_bonus = 0;
-
-    for building in buildings {
-        if building.name == "bank" {
-            gold_bonus += building.level;
-        }
-    }
-    gold_bonus
-}
-
-fn get_food_bonus(buildings: Vec<Building>) -> i32 {
-    let mut food_bonus = 0;
-
-    for building in buildings {
-        if building.name == "farm" {
-            food_bonus += building.level;
-        }
-    }
-    food_bonus
-}
-
-fn get_wood_bonus(buildings: Vec<Building>) -> i32 {
-    let mut wood_bonus = 0;
-
-    for building in buildings {
-        if building.name == "sawmill" {
-            wood_bonus += building.level;
-        }
-    }
-    wood_bonus
-}
-
-fn get_energy_bonus(buildings: Vec<Building>) -> i32 {
-    let mut energy_bonus = 0;
-
-    for building in buildings {
-        if building.name == "sanctuary" {
-            energy_bonus += building.level;
-        }
-    }
-    energy_bonus
 }
 
 #[allow(dead_code)]
@@ -470,49 +424,19 @@ impl FortressService for MyFortressService {
 
     async fn collect_fortress_gold(
         &self,
-        request: Request<CollectFortressGoldRequest>,
-    ) -> Result<Response<CollectFortressGoldResponse>, Status> {
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
         let fortress_id = request.into_inner().id;
-        let get_fortress_request = crate::crud::GetFortressRequest { id: fortress_id };
+        let collect_fortress_request = crate::crud::CollectFortressRequest { id: fortress_id };
         let fortress = self
             .crud_fortress_client
             .clone()
-            .get_fortress(get_fortress_request)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .into_inner()
-            .fortress
-            .ok_or_else(|| Status::not_found("fortress not found"))?;
-        let list_buildings_by_fortress_request =
-            crate::crud::ListBuildingsByFortressRequest { fortress_id };
-        let buildings = self
-            .crud_building_client
-            .clone()
-            .list_buildings_by_fortress(list_buildings_by_fortress_request)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .into_inner()
-            .buildings;
-        let gold_bonus = get_gold_bonus(buildings);
-        let update_fortress = UpdateFortress {
-            id: fortress_id,
-            gold: Some(fortress.gold + 1 + gold_bonus),
-            food: None,
-            wood: None,
-            energy: None,
-        };
-        let update_fortress_request = crate::crud::UpdateFortressRequest {
-            fortress: Some(update_fortress),
-        };
-        let fortress = self
-            .crud_fortress_client
-            .clone()
-            .update_fortress(update_fortress_request)
+            .collect_fortress_gold(collect_fortress_request)
             .await
             .map_err(|e| Status::internal(e.to_string()))?
             .into_inner()
             .fortress;
-        let message = CollectFortressGoldResponse { fortress };
+        let message = CollectFortressResponse { fortress };
 
         Ok(Response::new(message))
     }
@@ -543,49 +467,19 @@ impl FortressService for MyFortressService {
 
     async fn collect_fortress_food(
         &self,
-        request: Request<CollectFortressFoodRequest>,
-    ) -> Result<Response<CollectFortressFoodResponse>, Status> {
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
         let fortress_id = request.into_inner().id;
-        let get_fortress_request = crate::crud::GetFortressRequest { id: fortress_id };
+        let collect_fortress_request = crate::crud::CollectFortressRequest { id: fortress_id };
         let fortress = self
             .crud_fortress_client
             .clone()
-            .get_fortress(get_fortress_request)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .into_inner()
-            .fortress
-            .ok_or_else(|| Status::not_found("fortress not found"))?;
-        let list_buildings_by_fortress_request =
-            crate::crud::ListBuildingsByFortressRequest { fortress_id };
-        let buildings = self
-            .crud_building_client
-            .clone()
-            .list_buildings_by_fortress(list_buildings_by_fortress_request)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .into_inner()
-            .buildings;
-        let food_bonus = get_food_bonus(buildings);
-        let update_fortress = UpdateFortress {
-            id: fortress_id,
-            gold: None,
-            food: Some(fortress.food + 1 + food_bonus),
-            wood: None,
-            energy: None,
-        };
-        let update_fortress_request = crate::crud::UpdateFortressRequest {
-            fortress: Some(update_fortress),
-        };
-        let fortress = self
-            .crud_fortress_client
-            .clone()
-            .update_fortress(update_fortress_request)
+            .collect_fortress_food(collect_fortress_request)
             .await
             .map_err(|e| Status::internal(e.to_string()))?
             .into_inner()
             .fortress;
-        let message = CollectFortressFoodResponse { fortress };
+        let message = CollectFortressResponse { fortress };
 
         Ok(Response::new(message))
     }
@@ -616,49 +510,19 @@ impl FortressService for MyFortressService {
 
     async fn collect_fortress_wood(
         &self,
-        request: Request<CollectFortressWoodRequest>,
-    ) -> Result<Response<CollectFortressWoodResponse>, Status> {
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
         let fortress_id = request.into_inner().id;
-        let get_fortress_request = crate::crud::GetFortressRequest { id: fortress_id };
+        let collect_fortress_request = crate::crud::CollectFortressRequest { id: fortress_id };
         let fortress = self
             .crud_fortress_client
             .clone()
-            .get_fortress(get_fortress_request)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .into_inner()
-            .fortress
-            .ok_or_else(|| Status::not_found("fortress not found"))?;
-        let list_buildings_by_fortress_request =
-            crate::crud::ListBuildingsByFortressRequest { fortress_id };
-        let buildings = self
-            .crud_building_client
-            .clone()
-            .list_buildings_by_fortress(list_buildings_by_fortress_request)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .into_inner()
-            .buildings;
-        let wood_bonus = get_wood_bonus(buildings);
-        let update_fortress = UpdateFortress {
-            id: fortress_id,
-            gold: None,
-            food: None,
-            wood: Some(fortress.wood + 1 + wood_bonus),
-            energy: None,
-        };
-        let update_fortress_request = crate::crud::UpdateFortressRequest {
-            fortress: Some(update_fortress),
-        };
-        let fortress = self
-            .crud_fortress_client
-            .clone()
-            .update_fortress(update_fortress_request)
+            .collect_fortress_wood(collect_fortress_request)
             .await
             .map_err(|e| Status::internal(e.to_string()))?
             .into_inner()
             .fortress;
-        let message = CollectFortressWoodResponse { fortress };
+        let message = CollectFortressResponse { fortress };
 
         Ok(Response::new(message))
     }
@@ -689,49 +553,19 @@ impl FortressService for MyFortressService {
 
     async fn collect_fortress_energy(
         &self,
-        request: Request<CollectFortressEnergyRequest>,
-    ) -> Result<Response<CollectFortressEnergyResponse>, Status> {
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
         let fortress_id = request.into_inner().id;
-        let get_fortress_request = crate::crud::GetFortressRequest { id: fortress_id };
+        let collect_fortress_request = crate::crud::CollectFortressRequest { id: fortress_id };
         let fortress = self
             .crud_fortress_client
             .clone()
-            .get_fortress(get_fortress_request)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .into_inner()
-            .fortress
-            .ok_or_else(|| Status::not_found("fortress not found"))?;
-        let list_buildings_by_fortress_request =
-            crate::crud::ListBuildingsByFortressRequest { fortress_id };
-        let buildings = self
-            .crud_building_client
-            .clone()
-            .list_buildings_by_fortress(list_buildings_by_fortress_request)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
-            .into_inner()
-            .buildings;
-        let energy_bonus = get_energy_bonus(buildings);
-        let update_fortress = UpdateFortress {
-            id: fortress_id,
-            gold: None,
-            food: None,
-            wood: None,
-            energy: Some(fortress.energy + 1 + energy_bonus),
-        };
-        let update_fortress_request = crate::crud::UpdateFortressRequest {
-            fortress: Some(update_fortress),
-        };
-        let fortress = self
-            .crud_fortress_client
-            .clone()
-            .update_fortress(update_fortress_request)
+            .collect_fortress_energy(collect_fortress_request)
             .await
             .map_err(|e| Status::internal(e.to_string()))?
             .into_inner()
             .fortress;
-        let message = CollectFortressEnergyResponse { fortress };
+        let message = CollectFortressResponse { fortress };
 
         Ok(Response::new(message))
     }
