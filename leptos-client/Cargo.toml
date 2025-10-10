@@ -1,0 +1,10 @@
+[package]
+name = "leptos-client"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+leptos = { version = "0.8.10", features = ["csr"] }
+
+[lints]
+workspace = true
