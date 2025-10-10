@@ -1,14 +1,12 @@
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     networks:
       - rusty-network
-    # ports:
-    #   - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
       interval: 5s
@@ -34,8 +32,6 @@ services:
     restart: on-failure
     environment:
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}"
-    # ports:
-    #   - "3000:3000"
     networks:
       - rusty-network
     depends_on:
@@ -52,9 +48,18 @@ services:
     environment:
       CRUD_SERVER_URL: "http://crud_server:3000"
     ports:
-      - "8080:3000"
+      - "127.0.0.1:8080:3000"
     networks:
       - rusty-network
+  game_frontend:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: runtime-game-frontend
+      args:
+        GAME_API_URL: "http://127.0.0.1:8080"
+    ports:
+      - "127.0.0.1:8081:80"
 
 networks:
   rusty-network:
