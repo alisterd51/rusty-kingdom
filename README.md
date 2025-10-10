@@ -48,7 +48,8 @@ Cet exemple montre comment est déployé le serveur officiel (accessible via <ht
 ```yaml
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
+    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -71,7 +72,7 @@ services:
         condition: service_healthy
   crud_server:
     image: ghcr.io/alisterd51/rusty-crud-server:latest
-    restart: on-failure
+    restart: always
     environment:
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}"
     networks:
@@ -83,10 +84,10 @@ services:
         condition: service_completed_successfully
   game_server:
     image: ghcr.io/alisterd51/rusty-game-server:latest
-    restart: on-failure
+    restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.game_server.rule=Host(`rusty.anclarma.fr`)"
+      - "traefik.http.routers.game_server.rule=Host(`rusty.anclarma.fr`) && PathPrefix(`/game.`)"
       - "traefik.http.routers.game_server.entrypoints=websecure"
       - "traefik.http.routers.game_server.tls=true"
       - "traefik.http.routers.game_server.tls.certresolver=myresolver"
@@ -98,8 +99,22 @@ services:
     networks:
       - rusty-network
       - traefik-network
+  game_frontend:
+    image: ghcr.io/alisterd51/rusty-game-frontend:latest
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.game_frontend.rule=Host(`rusty.anclarma.fr`)"
+      - "traefik.http.routers.game_frontend.entrypoints=websecure"
+      - "traefik.http.routers.game_frontend.tls=true"
+      - "traefik.http.routers.game_frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.game_frontend.loadbalancer.server.port=80"
+      - "traefik.docker.network=traefik-network"
+    networks:
+      - traefik-network
   traefik:
-    image: traefik:v3.5
+    image: traefik:v3.6
+    restart: always
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"

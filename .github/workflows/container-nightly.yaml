@@ -13,6 +13,7 @@ jobs:
         container:
           - crud-server
           - game-server
+          - game-frontend
           - migration
     permissions:
       contents: read

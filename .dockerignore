@@ -4,6 +4,7 @@
 .gitignore
 compose.yaml
 Containerfile
+dist
 LICENSE
 README.md
 sample.env

@@ -1,0 +1,20 @@
+[package]
+name = "game-frontend"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# leptos
+leptos = { version = "0.8", features = ["csr"] }
+leptos_router = "0.8"
+# gRPC / protobuf
+tonic-web-wasm-client = "0.8"
+tonic = { version = "0.14", default-features = false, features = ["codegen"] }
+tonic-prost = "0.14"
+prost = "0.14"
+
+[build-dependencies]
+tonic-prost-build = "0.14"
+
+[lints]
+workspace = true
