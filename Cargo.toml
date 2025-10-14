@@ -6,6 +6,7 @@ members = [
 	"crud-server",
 	"game-client",
 	"game-server",
+	"leptos-client",
 	"migration"
 ]
 
