@@ -315,7 +315,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "crud-client"
-version = "0.6.4"
+version = "0.7.0"
 dependencies = [
  "prost",
  "tokio",
@@ -326,7 +326,7 @@ dependencies = [
 
 [[package]]
 name = "crud-server"
-version = "0.6.4"
+version = "0.7.0"
 dependencies = [
  "diesel",
  "prost",
@@ -539,7 +539,7 @@ dependencies = [
 
 [[package]]
 name = "game-client"
-version = "0.6.4"
+version = "0.7.0"
 dependencies = [
  "clap",
  "clap_complete",
@@ -554,7 +554,7 @@ dependencies = [
 
 [[package]]
 name = "game-server"
-version = "0.6.4"
+version = "0.7.0"
 dependencies = [
  "prost",
  "tokio",
@@ -833,7 +833,7 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 
 [[package]]
 name = "migration"
-version = "0.6.4"
+version = "0.7.0"
 dependencies = [
  "diesel",
  "diesel_migrations",
@@ -1245,7 +1245,7 @@ dependencies = [
 
 [[package]]
 name = "rusty"
-version = "0.6.4"
+version = "0.7.0"
 dependencies = [
  "diesel",
  "serde",
