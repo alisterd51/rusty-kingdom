@@ -55,6 +55,13 @@ services:
       - "8080:3000"
     networks:
       - rusty-network
+  leptos_client:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: runtime-leptos-client
+    ports:
+      - "8081:80"
 
 networks:
   rusty-network:
