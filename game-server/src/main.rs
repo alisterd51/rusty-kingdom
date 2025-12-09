@@ -14,6 +14,7 @@ use crate::{
 };
 use tokio::signal::unix::{SignalKind, signal};
 use tonic::transport::Server;
+use tonic_web::GrpcWebLayer;
 
 #[allow(clippy::pedantic)]
 #[allow(clippy::nursery)]
@@ -59,6 +60,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     Server::builder()
+        .accept_http1(true)
+        .layer(GrpcWebLayer::new())
         .add_service(BuildingServiceServer::new(building_service))
         .add_service(FortressServiceServer::new(fortress_service))
         .serve_with_shutdown(addr, shutdown_signal)
