@@ -273,7 +273,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "crud-client"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "prost",
  "tokio",
@@ -284,7 +284,7 @@ dependencies = [
 
 [[package]]
 name = "crud-server"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "diesel",
  "prost",
@@ -497,7 +497,7 @@ dependencies = [
 
 [[package]]
 name = "game-client"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "clap",
  "clap_complete",
@@ -512,13 +512,14 @@ dependencies = [
 
 [[package]]
 name = "game-server"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "prost",
  "tokio",
  "tonic",
  "tonic-prost",
  "tonic-prost-build",
+ "tonic-web",
 ]
 
 [[package]]
@@ -765,7 +766,7 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 
 [[package]]
 name = "migration"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "diesel",
  "diesel_migrations",
@@ -1155,7 +1156,7 @@ dependencies = [
 
 [[package]]
 name = "rusty"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "diesel",
  "serde",
@@ -1506,6 +1507,24 @@ dependencies = [
  "syn",
  "tempfile",
  "tonic-build",
+]
+
+[[package]]
+name = "tonic-web"
+version = "0.14.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75214f6b6bd28c19aa752ac09fdf0eea546095670906c21fe3940e180a4c43f2"
+dependencies = [
+ "base64",
+ "bytes",
+ "http",
+ "http-body",
+ "pin-project",
+ "tokio-stream",
+ "tonic",
+ "tower-layer",
+ "tower-service",
+ "tracing",
 ]
 
 [[package]]

@@ -4,8 +4,8 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-# rusty = { path = "../rusty" }
 tonic.workspace = true
+tonic-web.workspace = true
 tonic-prost.workspace = true
 prost.workspace = true
 tokio.workspace = true
