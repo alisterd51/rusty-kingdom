@@ -17,6 +17,15 @@ jobs:
       - name: install deps
         run: |
           sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Format
         run: cargo fmt --check
       - name: cargo fix
@@ -28,15 +37,9 @@ jobs:
           cargo fix --edition
           git diff --exit-code
       - name: cargo clippy
-        run: |
-          cargo clippy
-      - name: cargo clippy --release
-        run: |
-          cargo clippy --release
+        run: cargo clippy
       - name: Build
-        run: |
-          cargo build
-          cargo build --release
+        run: cargo build
       - name: Run tests
         run: cargo test
       - name: Run benchs
