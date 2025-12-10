@@ -15,6 +15,7 @@ use crate::{
 use tokio::signal::unix::{SignalKind, signal};
 use tonic::transport::Server;
 use tonic_web::GrpcWebLayer;
+use tower_http::cors::CorsLayer;
 
 #[allow(clippy::pedantic)]
 #[allow(clippy::nursery)]
@@ -52,15 +53,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut sigint = signal(SignalKind::interrupt()).unwrap();
 
         tokio::select! {
-            _ = sigterm.recv() => {
-            }
-            _ = sigint.recv() => {
-            }
+            _ = sigterm.recv() => {}
+            _ = sigint.recv() => {}
         }
     };
 
     Server::builder()
         .accept_http1(true)
+        .layer(CorsLayer::permissive())
         .layer(GrpcWebLayer::new())
         .add_service(BuildingServiceServer::new(building_service))
         .add_service(FortressServiceServer::new(fortress_service))

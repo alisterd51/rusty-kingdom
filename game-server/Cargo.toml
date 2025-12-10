@@ -9,6 +9,7 @@ tonic-web.workspace = true
 tonic-prost.workspace = true
 prost.workspace = true
 tokio.workspace = true
+tower-http = { version = "0.6.8", features = ["cors"] }
 
 [build-dependencies]
 tonic-prost-build.workspace = true
