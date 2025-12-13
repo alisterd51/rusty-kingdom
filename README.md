@@ -14,16 +14,22 @@ Rusty Kingdom est un jeu de gestion avec quelques subtilités :
     si c'est vrai, cela voudrat dire que le seul point limitant restant sera postgrsql
     il reste envisageable d'ajouter un proxy pour permettre a un client d'utiliser une api rest classique.
 
-## Install
+## WEB client
+
+<https://ruty.anclarma.fr>
+
+## CLI client
+
+### Install
 
 ```bash
-wget https://github.com/alisterd51/rusty-kingdom/releases/download/v0.6.3/game-client
+wget https://github.com/alisterd51/rusty-kingdom/releases/download/v0.7.0/game-client
 chmod +x ./game-client
 source <(./game-client completions bash)
 ./game-client --version
 ```
 
-## Start
+### Start
 
 ```bash
 # Create your fortress
@@ -122,13 +128,15 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
-      - "--entryPoints.websecure.address=:443"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http3"
       - "--certificatesresolvers.myresolver.acme.email=antoinereims28@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/acme/acme.json"
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
     ports:
       - "80:80"
-      - "443:443"
+      - "443:443/tcp"
+      - "443:443/udp"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - acme:/acme:rw
