@@ -16,7 +16,7 @@ Rusty Kingdom est un jeu de gestion avec quelques subtilités :
 
 ## WEB client
 
-<https://ruty.anclarma.fr>
+<https://rusty.anclarma.fr>
 
 ## CLI client
 
