@@ -844,6 +844,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "game-bot-example"
+version = "0.7.0"
+dependencies = [
+ "prost",
+ "tokio",
+ "tonic",
+ "tonic-prost",
+ "tonic-prost-build",
+]
+
+[[package]]
 name = "game-client"
 version = "0.7.0"
 dependencies = [
