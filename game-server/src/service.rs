@@ -6,18 +6,14 @@ use crate::{
         fortress_service_client::FortressServiceClient,
     },
     game::{
-        CollectFortressEnergyRequest, CollectFortressEnergyResponse, CollectFortressFoodRequest,
-        CollectFortressFoodResponse, CollectFortressGoldRequest, CollectFortressGoldResponse,
-        CollectFortressWoodRequest, CollectFortressWoodResponse, CreateFortressRequest,
+        CollectFortressRequest, CollectFortressResponse, CreateFortressRequest,
         CreateFortressResponse, DeleteFortressRequest, DeleteFortressResponse, GetBuildingRequest,
-        GetBuildingResponse, GetFortressEnergyRequest, GetFortressEnergyResponse,
-        GetFortressFoodRequest, GetFortressFoodResponse, GetFortressGoldRequest,
-        GetFortressGoldResponse, GetFortressRequest, GetFortressResponse, GetFortressWoodRequest,
-        GetFortressWoodResponse, GetImproveBuildingCostsRequest, GetImproveBuildingCostsResponse,
-        ImproveBuildingRequest, ImproveBuildingResponse, ListBuildingsByFortressRequest,
-        ListBuildingsByFortressResponse, ListBuildingsRequest, ListBuildingsResponse,
-        ListFortressesRequest, ListFortressesResponse, building_service_server::BuildingService,
-        fortress_service_server::FortressService,
+        GetBuildingResponse, GetFortressEnergyResponse, GetFortressFoodResponse,
+        GetFortressGoldResponse, GetFortressRequest, GetFortressResponse, GetFortressWoodResponse,
+        GetImproveBuildingCostsRequest, GetImproveBuildingCostsResponse, ImproveBuildingRequest,
+        ImproveBuildingResponse, ListBuildingsByFortressRequest, ListBuildingsByFortressResponse,
+        ListBuildingsRequest, ListBuildingsResponse, ListFortressesRequest, ListFortressesResponse,
+        building_service_server::BuildingService, fortress_service_server::FortressService,
     },
 };
 use tonic::{Request, Response, Status};
@@ -446,7 +442,7 @@ impl FortressService for MyFortressService {
 
     async fn get_fortress_gold(
         &self,
-        request: Request<GetFortressGoldRequest>,
+        request: Request<GetFortressRequest>,
     ) -> Result<Response<GetFortressGoldResponse>, Status> {
         let get_fortress_request = crate::crud::GetFortressRequest {
             id: request.into_inner().id,
@@ -470,8 +466,8 @@ impl FortressService for MyFortressService {
 
     async fn collect_fortress_gold(
         &self,
-        request: Request<CollectFortressGoldRequest>,
-    ) -> Result<Response<CollectFortressGoldResponse>, Status> {
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
         let fortress_id = request.into_inner().id;
         let get_fortress_request = crate::crud::GetFortressRequest { id: fortress_id };
         let fortress = self
@@ -512,14 +508,14 @@ impl FortressService for MyFortressService {
             .map_err(|e| Status::internal(e.to_string()))?
             .into_inner()
             .fortress;
-        let message = CollectFortressGoldResponse { fortress };
+        let message = CollectFortressResponse { fortress };
 
         Ok(Response::new(message))
     }
 
     async fn get_fortress_food(
         &self,
-        request: Request<GetFortressFoodRequest>,
+        request: Request<GetFortressRequest>,
     ) -> Result<Response<GetFortressFoodResponse>, Status> {
         let get_fortress_request = crate::crud::GetFortressRequest {
             id: request.into_inner().id,
@@ -543,8 +539,8 @@ impl FortressService for MyFortressService {
 
     async fn collect_fortress_food(
         &self,
-        request: Request<CollectFortressFoodRequest>,
-    ) -> Result<Response<CollectFortressFoodResponse>, Status> {
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
         let fortress_id = request.into_inner().id;
         let get_fortress_request = crate::crud::GetFortressRequest { id: fortress_id };
         let fortress = self
@@ -585,14 +581,14 @@ impl FortressService for MyFortressService {
             .map_err(|e| Status::internal(e.to_string()))?
             .into_inner()
             .fortress;
-        let message = CollectFortressFoodResponse { fortress };
+        let message = CollectFortressResponse { fortress };
 
         Ok(Response::new(message))
     }
 
     async fn get_fortress_wood(
         &self,
-        request: Request<GetFortressWoodRequest>,
+        request: Request<GetFortressRequest>,
     ) -> Result<Response<GetFortressWoodResponse>, Status> {
         let get_fortress_request = crate::crud::GetFortressRequest {
             id: request.into_inner().id,
@@ -616,8 +612,8 @@ impl FortressService for MyFortressService {
 
     async fn collect_fortress_wood(
         &self,
-        request: Request<CollectFortressWoodRequest>,
-    ) -> Result<Response<CollectFortressWoodResponse>, Status> {
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
         let fortress_id = request.into_inner().id;
         let get_fortress_request = crate::crud::GetFortressRequest { id: fortress_id };
         let fortress = self
@@ -658,14 +654,14 @@ impl FortressService for MyFortressService {
             .map_err(|e| Status::internal(e.to_string()))?
             .into_inner()
             .fortress;
-        let message = CollectFortressWoodResponse { fortress };
+        let message = CollectFortressResponse { fortress };
 
         Ok(Response::new(message))
     }
 
     async fn get_fortress_energy(
         &self,
-        request: Request<GetFortressEnergyRequest>,
+        request: Request<GetFortressRequest>,
     ) -> Result<Response<GetFortressEnergyResponse>, Status> {
         let get_fortress_request = crate::crud::GetFortressRequest {
             id: request.into_inner().id,
@@ -689,8 +685,8 @@ impl FortressService for MyFortressService {
 
     async fn collect_fortress_energy(
         &self,
-        request: Request<CollectFortressEnergyRequest>,
-    ) -> Result<Response<CollectFortressEnergyResponse>, Status> {
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
         let fortress_id = request.into_inner().id;
         let get_fortress_request = crate::crud::GetFortressRequest { id: fortress_id };
         let fortress = self
@@ -731,7 +727,7 @@ impl FortressService for MyFortressService {
             .map_err(|e| Status::internal(e.to_string()))?
             .into_inner()
             .fortress;
-        let message = CollectFortressEnergyResponse { fortress };
+        let message = CollectFortressResponse { fortress };
 
         Ok(Response::new(message))
     }

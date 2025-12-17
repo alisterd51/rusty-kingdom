@@ -11,7 +11,7 @@ members = [
 	"migration",
 ]
 
-package.version = "0.7.0"
+package.version = "0.8.0"
 package.edition = "2024"
 
 [workspace.dependencies]
@@ -47,3 +47,4 @@ panic = "abort"
 codegen-units = 1
 lto = true
 strip = true
+opt-level = "s"

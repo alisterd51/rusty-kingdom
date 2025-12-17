@@ -1,8 +1,6 @@
 use crate::game::{
-    CollectFortressEnergyRequest, CollectFortressFoodRequest, CollectFortressGoldRequest,
-    CollectFortressWoodRequest, CreateFortressRequest, DeleteFortressRequest, GetBuildingRequest,
-    GetFortressEnergyRequest, GetFortressFoodRequest, GetFortressGoldRequest, GetFortressRequest,
-    GetFortressWoodRequest, GetImproveBuildingCostsRequest, ImproveBuildingRequest,
+    CollectFortressRequest, CreateFortressRequest, DeleteFortressRequest, GetBuildingRequest,
+    GetFortressRequest, GetImproveBuildingCostsRequest, ImproveBuildingRequest,
     ListBuildingsByFortressRequest, ListBuildingsRequest, ListFortressesRequest,
     building_service_client::BuildingServiceClient, fortress_service_client::FortressServiceClient,
 };
@@ -130,56 +128,56 @@ async fn handle_fortress(
         }
         FortressCommands::GetGold { fortress_id } => {
             let response = fortress_client
-                .get_fortress_gold(GetFortressGoldRequest { id: fortress_id })
+                .get_fortress_gold(GetFortressRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.gold));
         }
         FortressCommands::CollectGold { fortress_id } => {
             let response = fortress_client
-                .collect_fortress_gold(CollectFortressGoldRequest { id: fortress_id })
+                .collect_fortress_gold(CollectFortressRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.fortress));
         }
         FortressCommands::GetFood { fortress_id } => {
             let response = fortress_client
-                .get_fortress_food(GetFortressFoodRequest { id: fortress_id })
+                .get_fortress_food(GetFortressRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.food));
         }
         FortressCommands::CollectFood { fortress_id } => {
             let response = fortress_client
-                .collect_fortress_food(CollectFortressFoodRequest { id: fortress_id })
+                .collect_fortress_food(CollectFortressRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.fortress));
         }
         FortressCommands::GetWood { fortress_id } => {
             let response = fortress_client
-                .get_fortress_wood(GetFortressWoodRequest { id: fortress_id })
+                .get_fortress_wood(GetFortressRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.wood));
         }
         FortressCommands::CollectWood { fortress_id } => {
             let response = fortress_client
-                .collect_fortress_wood(CollectFortressWoodRequest { id: fortress_id })
+                .collect_fortress_wood(CollectFortressRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.fortress));
         }
         FortressCommands::GetEnergy { fortress_id } => {
             let response = fortress_client
-                .get_fortress_energy(GetFortressEnergyRequest { id: fortress_id })
+                .get_fortress_energy(GetFortressRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.energy));
         }
         FortressCommands::CollectEnergy { fortress_id } => {
             let response = fortress_client
-                .collect_fortress_energy(CollectFortressEnergyRequest { id: fortress_id })
+                .collect_fortress_energy(CollectFortressRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.fortress));
@@ -242,12 +240,12 @@ async fn handle_bench(
         .into_inner()
         .fortress
         .ok_or_else(|| "fortress not found".to_string())?;
-    let request = CollectFortressGoldRequest { id: fortress.id };
+    let request = CollectFortressRequest { id: fortress.id };
     for _ in 0..size {
         let _ = fortress_client.collect_fortress_gold(request).await?;
     }
     let response = fortress_client
-        .get_fortress_gold(GetFortressGoldRequest { id: fortress.id })
+        .get_fortress_gold(GetFortressRequest { id: fortress.id })
         .await?
         .into_inner();
     println!("gold: {}", response.gold);
