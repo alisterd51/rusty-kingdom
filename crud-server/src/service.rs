@@ -1,17 +1,18 @@
 use crate::{
     DbPool,
     crud::{
-        CreateBuildingRequest, CreateBuildingResponse, CreateFortressRequest,
-        CreateFortressResponse, DeleteBuildingRequest, DeleteBuildingResponse,
-        DeleteFortressRequest, DeleteFortressResponse, GetBuildingRequest, GetBuildingResponse,
-        GetFortressRequest, GetFortressResponse, ListBuildingsByFortressRequest,
-        ListBuildingsByFortressResponse, ListBuildingsRequest, ListBuildingsResponse,
-        ListFortressesRequest, ListFortressesResponse, UpdateBuildingRequest,
-        UpdateBuildingResponse, UpdateFortressRequest, UpdateFortressResponse,
-        building_service_server::BuildingService, fortress_service_server::FortressService,
+        CollectFortressRequest, CollectFortressResponse, CreateBuildingRequest,
+        CreateBuildingResponse, CreateFortressRequest, CreateFortressResponse,
+        DeleteBuildingRequest, DeleteBuildingResponse, DeleteFortressRequest,
+        DeleteFortressResponse, GetBuildingRequest, GetBuildingResponse, GetFortressRequest,
+        GetFortressResponse, ListBuildingsByFortressRequest, ListBuildingsByFortressResponse,
+        ListBuildingsRequest, ListBuildingsResponse, ListFortressesRequest, ListFortressesResponse,
+        UpdateBuildingRequest, UpdateBuildingResponse, UpdateFortressRequest,
+        UpdateFortressResponse, building_service_server::BuildingService,
+        fortress_service_server::FortressService,
     },
 };
-use diesel::prelude::*;
+use diesel::{prelude::*, sql_types::Integer};
 use rusty::{
     models::{NewBuilding, NewFortress, UpdateBuilding, UpdateFortress},
     schema::{buildings, fortresses},
@@ -351,5 +352,105 @@ impl FortressService for MyFortressService {
         };
 
         Ok(Response::new(fortresses))
+    }
+
+    async fn collect_fortress_gold(
+        &self,
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
+        let fortress_id = request.into_inner().id;
+        let mut conn = self
+            .pool
+            .get()
+            .map_err(|e| Status::internal(format!("{e}")))?;
+        let fortress = diesel::sql_query(
+            "UPDATE fortresses
+            SET gold = gold + 1 + public.gold_bonus_for_fortress($1)
+            WHERE id = $1
+            RETURNING id, gold, food, wood, energy",
+        )
+        .bind::<Integer, _>(fortress_id)
+        .get_result::<rusty::models::Fortress>(&mut conn)
+        .map_err(|e| Status::internal(format!("{e}")))?;
+        let fortress = CollectFortressResponse {
+            fortress: Some(fortress.into()),
+        };
+
+        Ok(Response::new(fortress))
+    }
+
+    async fn collect_fortress_food(
+        &self,
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
+        let fortress_id = request.into_inner().id;
+        let mut conn = self
+            .pool
+            .get()
+            .map_err(|e| Status::internal(format!("{e}")))?;
+        let fortress = diesel::sql_query(
+            "UPDATE fortresses
+            SET food = food + 1 + public.food_bonus_for_fortress($1)
+            WHERE id = $1
+            RETURNING id, gold, food, wood, energy",
+        )
+        .bind::<Integer, _>(fortress_id)
+        .get_result::<rusty::models::Fortress>(&mut conn)
+        .map_err(|e| Status::internal(format!("{e}")))?;
+        let fortress = CollectFortressResponse {
+            fortress: Some(fortress.into()),
+        };
+
+        Ok(Response::new(fortress))
+    }
+
+    async fn collect_fortress_wood(
+        &self,
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
+        let fortress_id = request.into_inner().id;
+        let mut conn = self
+            .pool
+            .get()
+            .map_err(|e| Status::internal(format!("{e}")))?;
+        let fortress = diesel::sql_query(
+            "UPDATE fortresses
+            SET wood = wood + 1 + public.wood_bonus_for_fortress($1)
+            WHERE id = $1
+            RETURNING id, gold, food, wood, energy",
+        )
+        .bind::<Integer, _>(fortress_id)
+        .get_result::<rusty::models::Fortress>(&mut conn)
+        .map_err(|e| Status::internal(format!("{e}")))?;
+        let fortress = CollectFortressResponse {
+            fortress: Some(fortress.into()),
+        };
+
+        Ok(Response::new(fortress))
+    }
+
+    async fn collect_fortress_energy(
+        &self,
+        request: Request<CollectFortressRequest>,
+    ) -> Result<Response<CollectFortressResponse>, Status> {
+        let fortress_id = request.into_inner().id;
+        let mut conn = self
+            .pool
+            .get()
+            .map_err(|e| Status::internal(format!("{e}")))?;
+        let fortress = diesel::sql_query(
+            "UPDATE fortresses
+            SET energy = energy + 1 + public.energy_bonus_for_fortress($1)
+            WHERE id = $1
+            RETURNING id, gold, food, wood, energy",
+        )
+        .bind::<Integer, _>(fortress_id)
+        .get_result::<rusty::models::Fortress>(&mut conn)
+        .map_err(|e| Status::internal(format!("{e}")))?;
+        let fortress = CollectFortressResponse {
+            fortress: Some(fortress.into()),
+        };
+
+        Ok(Response::new(fortress))
     }
 }

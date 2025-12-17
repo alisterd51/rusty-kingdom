@@ -50,10 +50,22 @@ message DeleteFortressResponse { bool success = 1; }
 message ListFortressesRequest {}
 message ListFortressesResponse { repeated common.Fortress fortresses = 1; }
 
+message CollectFortressRequest { int32 id = 1; }
+message CollectFortressResponse { common.Fortress fortress = 1; }
+
 service FortressService {
   rpc CreateFortress(CreateFortressRequest) returns (CreateFortressResponse);
   rpc GetFortress(GetFortressRequest) returns (GetFortressResponse);
   rpc UpdateFortress(UpdateFortressRequest) returns (UpdateFortressResponse);
   rpc DeleteFortress(DeleteFortressRequest) returns (DeleteFortressResponse);
   rpc ListFortresses(ListFortressesRequest) returns (ListFortressesResponse);
+
+  rpc CollectFortressGold(CollectFortressRequest)
+      returns (CollectFortressResponse);
+  rpc CollectFortressFood(CollectFortressRequest)
+      returns (CollectFortressResponse);
+  rpc CollectFortressWood(CollectFortressRequest)
+      returns (CollectFortressResponse);
+  rpc CollectFortressEnergy(CollectFortressRequest)
+      returns (CollectFortressResponse);
 }
