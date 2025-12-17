@@ -4,10 +4,11 @@ members = [
 	"rusty",
 	"crud-client",
 	"crud-server",
+	"game-bot-example",
 	"game-client",
 	"game-frontend",
 	"game-server",
-	"migration"
+	"migration",
 ]
 
 package.version = "0.7.0"
