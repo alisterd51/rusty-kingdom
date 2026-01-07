@@ -1,9 +1,11 @@
 use crate::{
     app::{ResourceView, get_client, use_id_param},
-    common::Costs,
-    game::{
-        GetBuildingRequest, GetImproveBuildingCostsRequest, ImproveBuildingRequest,
-        building_service_client::BuildingServiceClient,
+    pb::{
+        common::v1::Costs,
+        game::v1::{
+            GetBuildingRequest, GetImproveBuildingCostsRequest, ImproveBuildingRequest,
+            building_service_client::BuildingServiceClient,
+        },
     },
 };
 use leptos::prelude::*;

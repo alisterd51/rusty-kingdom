@@ -11,7 +11,7 @@ members = [
 	"migration",
 ]
 
-package.version = "0.8.0"
+package.version = "0.9.0"
 package.edition = "2024"
 
 [workspace.dependencies]
@@ -41,6 +41,9 @@ unsafe_code = "forbid"
 all = "deny"
 pedantic = "deny"
 nursery = "deny"
+# from clippy::restriction
+# unwrap_used = "deny"
+# expect_used = "deny"
 
 [profile.release]
 panic = "abort"

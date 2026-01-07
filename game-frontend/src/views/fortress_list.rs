@@ -1,6 +1,6 @@
 use crate::{
     app::{ResourceView, get_client},
-    game::{
+    pb::game::v1::{
         CreateFortressRequest, DeleteFortressRequest, ListFortressesRequest,
         fortress_service_client::FortressServiceClient,
     },

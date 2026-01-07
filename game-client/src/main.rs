@@ -1,28 +1,33 @@
-use crate::game::{
-    CollectFortressRequest, CreateFortressRequest, DeleteFortressRequest, GetBuildingRequest,
-    GetFortressRequest, GetImproveBuildingCostsRequest, ImproveBuildingRequest,
+#[allow(clippy::pedantic)]
+#[allow(clippy::nursery)]
+pub mod pb {
+    pub mod common {
+        pub mod v1 {
+            tonic::include_proto!("common.v1");
+        }
+    }
+    pub mod game {
+        pub mod v1 {
+            tonic::include_proto!("game.v1");
+        }
+    }
+}
+
+use clap::{Command, CommandFactory, Parser, Subcommand};
+use clap_complete::{Generator, Shell, generate};
+use pb::game::v1::{
+    CollectFortressEnergyRequest, CollectFortressFoodRequest, CollectFortressGoldRequest,
+    CollectFortressWoodRequest, CreateFortressRequest, DeleteFortressRequest, GetBuildingRequest,
+    GetFortressEnergyRequest, GetFortressFoodRequest, GetFortressGoldRequest, GetFortressRequest,
+    GetFortressWoodRequest, GetImproveBuildingCostsRequest, ImproveBuildingRequest,
     ListBuildingsByFortressRequest, ListBuildingsRequest, ListFortressesRequest,
     building_service_client::BuildingServiceClient, fortress_service_client::FortressServiceClient,
 };
-use clap::{Command, CommandFactory, Parser, Subcommand};
-use clap_complete::{Generator, Shell, generate};
 use serde_json::json;
 use std::io;
 use tonic::transport::Channel;
 
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
-pub mod common {
-    tonic::include_proto!("common");
-}
-
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
-pub mod game {
-    tonic::include_proto!("game");
-}
-
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
     #[command(subcommand)]
@@ -37,7 +42,7 @@ struct Args {
     url: String,
 }
 
-#[derive(Subcommand, Debug, Clone)]
+#[derive(Subcommand, Clone)]
 enum Commands {
     Fortress {
         #[command(subcommand)]
@@ -55,7 +60,7 @@ enum Commands {
     },
 }
 
-#[derive(Subcommand, Debug, Clone)]
+#[derive(Subcommand, Clone)]
 enum BuildingCommands {
     GetAll,
     Get { building_id: i32 },
@@ -63,7 +68,7 @@ enum BuildingCommands {
     GetImproveCosts { building_id: i32 },
 }
 
-#[derive(Subcommand, Debug, Clone)]
+#[derive(Subcommand, Clone)]
 enum FortressCommands {
     GetAll,
     New,
@@ -128,56 +133,56 @@ async fn handle_fortress(
         }
         FortressCommands::GetGold { fortress_id } => {
             let response = fortress_client
-                .get_fortress_gold(GetFortressRequest { id: fortress_id })
+                .get_fortress_gold(GetFortressGoldRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.gold));
         }
         FortressCommands::CollectGold { fortress_id } => {
             let response = fortress_client
-                .collect_fortress_gold(CollectFortressRequest { id: fortress_id })
+                .collect_fortress_gold(CollectFortressGoldRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.fortress));
         }
         FortressCommands::GetFood { fortress_id } => {
             let response = fortress_client
-                .get_fortress_food(GetFortressRequest { id: fortress_id })
+                .get_fortress_food(GetFortressFoodRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.food));
         }
         FortressCommands::CollectFood { fortress_id } => {
             let response = fortress_client
-                .collect_fortress_food(CollectFortressRequest { id: fortress_id })
+                .collect_fortress_food(CollectFortressFoodRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.fortress));
         }
         FortressCommands::GetWood { fortress_id } => {
             let response = fortress_client
-                .get_fortress_wood(GetFortressRequest { id: fortress_id })
+                .get_fortress_wood(GetFortressWoodRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.wood));
         }
         FortressCommands::CollectWood { fortress_id } => {
             let response = fortress_client
-                .collect_fortress_wood(CollectFortressRequest { id: fortress_id })
+                .collect_fortress_wood(CollectFortressWoodRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.fortress));
         }
         FortressCommands::GetEnergy { fortress_id } => {
             let response = fortress_client
-                .get_fortress_energy(GetFortressRequest { id: fortress_id })
+                .get_fortress_energy(GetFortressEnergyRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.energy));
         }
         FortressCommands::CollectEnergy { fortress_id } => {
             let response = fortress_client
-                .collect_fortress_energy(CollectFortressRequest { id: fortress_id })
+                .collect_fortress_energy(CollectFortressEnergyRequest { id: fortress_id })
                 .await?
                 .into_inner();
             println!("{}", json!(response.fortress));
@@ -240,16 +245,16 @@ async fn handle_bench(
         .into_inner()
         .fortress
         .ok_or_else(|| "fortress not found".to_string())?;
-    let request = CollectFortressRequest { id: fortress.id };
+    let request = CollectFortressGoldRequest { id: fortress.id };
     for _ in 0..size {
-        let _ = fortress_client.collect_fortress_gold(request).await?;
+        fortress_client.collect_fortress_gold(request).await?;
     }
     let response = fortress_client
-        .get_fortress_gold(GetFortressRequest { id: fortress.id })
+        .get_fortress_gold(GetFortressGoldRequest { id: fortress.id })
         .await?
         .into_inner();
     println!("gold: {}", response.gold);
-    let _ = fortress_client
+    fortress_client
         .delete_fortress(DeleteFortressRequest { id: fortress.id })
         .await?;
     Ok(())

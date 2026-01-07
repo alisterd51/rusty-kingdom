@@ -1,14 +1,15 @@
 pub mod service;
 
-#[allow(unused_imports)]
 use crate::{
-    crud::{
-        building_service_client::BuildingServiceClient,
-        fortress_service_client::FortressServiceClient,
-    },
-    game::{
-        building_service_server::BuildingServiceServer,
-        fortress_service_server::FortressServiceServer,
+    pb::{
+        crud::v1::{
+            building_service_client::BuildingServiceClient,
+            fortress_service_client::FortressServiceClient,
+        },
+        game::v1::{
+            building_service_server::BuildingServiceServer,
+            fortress_service_server::FortressServiceServer,
+        },
     },
     service::{MyBuildingService, MyFortressService},
 };
@@ -19,20 +20,22 @@ use tower_http::cors::CorsLayer;
 
 #[allow(clippy::pedantic)]
 #[allow(clippy::nursery)]
-pub mod common {
-    tonic::include_proto!("common");
-}
-
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
-pub mod crud {
-    tonic::include_proto!("crud");
-}
-
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
-pub mod game {
-    tonic::include_proto!("game");
+pub mod pb {
+    pub mod common {
+        pub mod v1 {
+            tonic::include_proto!("common.v1");
+        }
+    }
+    pub mod crud {
+        pub mod v1 {
+            tonic::include_proto!("crud.v1");
+        }
+    }
+    pub mod game {
+        pub mod v1 {
+            tonic::include_proto!("game.v1");
+        }
+    }
 }
 
 #[tokio::main]

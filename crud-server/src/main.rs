@@ -1,31 +1,31 @@
+#[allow(clippy::pedantic)]
+#[allow(clippy::nursery)]
+pub mod pb {
+    pub mod common {
+        pub mod v1 {
+            tonic::include_proto!("common.v1");
+        }
+    }
+    pub mod crud {
+        pub mod v1 {
+            tonic::include_proto!("crud.v1");
+        }
+    }
+}
+
 pub mod service;
 
-use crate::{
-    crud::{
-        building_service_server::BuildingServiceServer,
-        fortress_service_server::FortressServiceServer,
-    },
-    service::{MyBuildingService, MyFortressService},
-};
 use diesel::{
     PgConnection,
     r2d2::{ConnectionManager, Pool},
 };
+use pb::crud::v1::{
+    building_service_server::BuildingServiceServer, fortress_service_server::FortressServiceServer,
+};
+use service::{MyBuildingService, MyFortressService};
 use std::sync::Arc;
 use tokio::signal::unix::{SignalKind, signal};
 use tonic::transport::Server;
-
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
-pub mod common {
-    tonic::include_proto!("common");
-}
-
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
-pub mod crud {
-    tonic::include_proto!("crud");
-}
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 

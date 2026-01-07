@@ -1,0 +1,143 @@
+syntax = "proto3";
+package game.v1;
+
+import "common/v1/common.proto";
+
+// Building
+
+message GetBuildingRequest {
+  int32 id = 1;
+}
+message GetBuildingResponse {
+  common.v1.Building building = 1;
+}
+
+message ListBuildingsRequest {}
+message ListBuildingsResponse {
+  repeated common.v1.Building buildings = 1;
+}
+
+message ListBuildingsByFortressRequest {
+  int32 fortress_id = 1;
+}
+message ListBuildingsByFortressResponse {
+  repeated common.v1.Building buildings = 1;
+}
+
+message ImproveBuildingRequest {
+  int32 id = 1;
+}
+message ImproveBuildingResponse {
+  common.v1.Fortress fortress = 1;
+  common.v1.Building building = 2;
+}
+
+message GetImproveBuildingCostsRequest {
+  int32 id = 1;
+}
+message GetImproveBuildingCostsResponse {
+  common.v1.Costs costs = 1;
+}
+
+service BuildingService {
+  rpc GetBuilding(GetBuildingRequest) returns (GetBuildingResponse);
+  rpc ListBuildings(ListBuildingsRequest) returns (ListBuildingsResponse);
+  rpc ListBuildingsByFortress(ListBuildingsByFortressRequest) returns (ListBuildingsByFortressResponse);
+  rpc ImproveBuilding(ImproveBuildingRequest) returns (ImproveBuildingResponse);
+  rpc GetImproveBuildingCosts(GetImproveBuildingCostsRequest) returns (GetImproveBuildingCostsResponse);
+}
+
+// Fortress
+
+message CreateFortressRequest {}
+message CreateFortressResponse {
+  common.v1.Fortress fortress = 1;
+  repeated common.v1.Building buildings = 2;
+}
+
+message GetFortressRequest {
+  int32 id = 1;
+}
+message GetFortressResponse {
+  common.v1.Fortress fortress = 1;
+}
+message GetFortressGoldRequest {
+  int32 id = 1;
+}
+message GetFortressGoldResponse {
+  int32 gold = 1;
+}
+message GetFortressFoodRequest {
+  int32 id = 1;
+}
+message GetFortressFoodResponse {
+  int32 food = 1;
+}
+message GetFortressWoodRequest {
+  int32 id = 1;
+}
+message GetFortressWoodResponse {
+  int32 wood = 1;
+}
+message GetFortressEnergyRequest {
+  int32 id = 1;
+}
+message GetFortressEnergyResponse {
+  int32 energy = 1;
+}
+
+message CollectFortressGoldRequest {
+  int32 id = 1;
+}
+message CollectFortressGoldResponse {
+  common.v1.Fortress fortress = 1;
+}
+message CollectFortressFoodRequest {
+  int32 id = 1;
+}
+message CollectFortressFoodResponse {
+  common.v1.Fortress fortress = 1;
+}
+message CollectFortressWoodRequest {
+  int32 id = 1;
+}
+message CollectFortressWoodResponse {
+  common.v1.Fortress fortress = 1;
+}
+message CollectFortressEnergyRequest {
+  int32 id = 1;
+}
+message CollectFortressEnergyResponse {
+  common.v1.Fortress fortress = 1;
+}
+
+message DeleteFortressRequest {
+  int32 id = 1;
+}
+message DeleteFortressResponse {
+  bool success = 1;
+}
+
+message ListFortressesRequest {}
+message ListFortressesResponse {
+  repeated common.v1.Fortress fortresses = 1;
+}
+
+service FortressService {
+  rpc CreateFortress(CreateFortressRequest) returns (CreateFortressResponse);
+  rpc GetFortress(GetFortressRequest) returns (GetFortressResponse);
+  rpc DeleteFortress(DeleteFortressRequest) returns (DeleteFortressResponse);
+  rpc ListFortresses(ListFortressesRequest) returns (ListFortressesResponse);
+
+  rpc GetFortressGold(GetFortressGoldRequest) returns (GetFortressGoldResponse);
+  rpc CollectFortressGold(CollectFortressGoldRequest) returns (CollectFortressGoldResponse);
+
+  rpc GetFortressFood(GetFortressFoodRequest) returns (GetFortressFoodResponse);
+  rpc CollectFortressFood(CollectFortressFoodRequest) returns (CollectFortressFoodResponse);
+
+  rpc GetFortressWood(GetFortressWoodRequest) returns (GetFortressWoodResponse);
+  rpc CollectFortressWood(CollectFortressWoodRequest) returns (CollectFortressWoodResponse);
+
+  rpc GetFortressEnergy(GetFortressEnergyRequest) returns (GetFortressEnergyResponse);
+  rpc CollectFortressEnergy(CollectFortressEnergyRequest) returns (CollectFortressEnergyResponse);
+}

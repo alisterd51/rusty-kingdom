@@ -1,18 +1,19 @@
 #[allow(clippy::pedantic)]
 #[allow(clippy::nursery)]
-pub mod common {
-    tonic::include_proto!("common");
+pub mod pb {
+    pub mod common {
+        pub mod v1 {
+            tonic::include_proto!("common.v1");
+        }
+    }
+    pub mod crud {
+        pub mod v1 {
+            tonic::include_proto!("crud.v1");
+        }
+    }
 }
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
-pub mod crud {
-    tonic::include_proto!("crud");
-}
-// use crate::common::NewFortress;
-use crate::crud::ListFortressesRequest;
-#[allow(unused_imports)]
-use crud::CreateFortressRequest;
-use crud::fortress_service_client::FortressServiceClient;
+
+use pb::crud::v1::{ListFortressesRequest, fortress_service_client::FortressServiceClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
