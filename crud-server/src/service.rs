@@ -1,6 +1,6 @@
 use crate::{
     DbPool,
-    crud::{
+    pb::crud::v1::{
         CreateBuildingRequest, CreateBuildingResponse, CreateFortressRequest,
         CreateFortressResponse, DeleteBuildingRequest, DeleteBuildingResponse,
         DeleteFortressRequest, DeleteFortressResponse, GetBuildingRequest, GetBuildingResponse,
@@ -13,14 +13,14 @@ use crate::{
 };
 use diesel::prelude::*;
 use rusty::{
-    models::{NewBuilding, NewFortress, UpdateBuilding, UpdateFortress},
+    models::{Building, Fortress, NewBuilding, NewFortress, UpdateBuilding, UpdateFortress},
     schema::{buildings, fortresses},
 };
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
 
-impl From<rusty::models::Building> for crate::common::Building {
-    fn from(value: rusty::models::Building) -> Self {
+impl From<Building> for crate::pb::common::v1::Building {
+    fn from(value: Building) -> Self {
         Self {
             id: value.id,
             name: value.name,
@@ -30,8 +30,8 @@ impl From<rusty::models::Building> for crate::common::Building {
     }
 }
 
-impl From<crate::common::NewBuilding> for rusty::models::NewBuilding {
-    fn from(value: crate::common::NewBuilding) -> Self {
+impl From<crate::pb::common::v1::NewBuilding> for NewBuilding {
+    fn from(value: crate::pb::common::v1::NewBuilding) -> Self {
         Self {
             name: value.name,
             level: value.level,
@@ -40,8 +40,8 @@ impl From<crate::common::NewBuilding> for rusty::models::NewBuilding {
     }
 }
 
-impl From<crate::common::UpdateBuilding> for rusty::models::UpdateBuilding {
-    fn from(value: crate::common::UpdateBuilding) -> Self {
+impl From<crate::pb::common::v1::UpdateBuilding> for UpdateBuilding {
+    fn from(value: crate::pb::common::v1::UpdateBuilding) -> Self {
         Self {
             name: value.name,
             level: value.level,
@@ -50,8 +50,8 @@ impl From<crate::common::UpdateBuilding> for rusty::models::UpdateBuilding {
     }
 }
 
-impl From<rusty::models::Fortress> for crate::common::Fortress {
-    fn from(value: rusty::models::Fortress) -> Self {
+impl From<Fortress> for crate::pb::common::v1::Fortress {
+    fn from(value: Fortress) -> Self {
         Self {
             id: value.id,
             gold: value.gold,
@@ -62,8 +62,8 @@ impl From<rusty::models::Fortress> for crate::common::Fortress {
     }
 }
 
-impl From<crate::common::NewFortress> for rusty::models::NewFortress {
-    fn from(value: crate::common::NewFortress) -> Self {
+impl From<crate::pb::common::v1::NewFortress> for NewFortress {
+    fn from(value: crate::pb::common::v1::NewFortress) -> Self {
         Self {
             gold: value.gold,
             food: value.food,
@@ -73,8 +73,8 @@ impl From<crate::common::NewFortress> for rusty::models::NewFortress {
     }
 }
 
-impl From<crate::common::UpdateFortress> for rusty::models::UpdateFortress {
-    fn from(value: crate::common::UpdateFortress) -> Self {
+impl From<crate::pb::common::v1::UpdateFortress> for UpdateFortress {
+    fn from(value: crate::pb::common::v1::UpdateFortress) -> Self {
         Self {
             gold: value.gold,
             food: value.food,
@@ -112,7 +112,7 @@ impl BuildingService for MyBuildingService {
             .map_err(|e| Status::internal(format!("{e}")))?;
         let building = diesel::insert_into(buildings::table)
             .values(new_building)
-            .returning(rusty::models::Building::as_returning())
+            .returning(Building::as_returning())
             .get_result(&mut conn)
             .map_err(|e| Status::internal(format!("{e}")))?;
         let building = CreateBuildingResponse {
@@ -131,7 +131,7 @@ impl BuildingService for MyBuildingService {
             .pool
             .get()
             .map_err(|e| Status::internal(format!("{e}")))?;
-        let building: rusty::models::Building = buildings::table
+        let building: Building = buildings::table
             .filter(buildings::id.eq(building_id))
             .get_result(&mut conn)
             .map_err(|e| Status::not_found(format!("{e}")))?;
@@ -159,7 +159,7 @@ impl BuildingService for MyBuildingService {
         let building = diesel::update(buildings::table)
             .filter(buildings::id.eq(building_id))
             .set(update_building)
-            .returning(rusty::models::Building::as_returning())
+            .returning(Building::as_returning())
             .get_result(&mut conn)
             .map_err(|e| Status::internal(format!("{e}")))?;
         let building = UpdateBuildingResponse {
@@ -196,7 +196,7 @@ impl BuildingService for MyBuildingService {
             .pool
             .get()
             .map_err(|e| Status::internal(format!("{e}")))?;
-        let buildings: Vec<rusty::models::Building> = buildings::table
+        let buildings: Vec<Building> = buildings::table
             .get_results(&mut conn)
             .map_err(|e| Status::internal(format!("{e}")))?;
         let buildings = ListBuildingsResponse {
@@ -215,7 +215,7 @@ impl BuildingService for MyBuildingService {
             .get()
             .map_err(|e| Status::internal(format!("{e}")))?;
         let fortress_id = request.into_inner().fortress_id;
-        let buildings: Vec<rusty::models::Building> = buildings::table
+        let buildings: Vec<Building> = buildings::table
             .filter(buildings::fortress_id.eq(fortress_id))
             .get_results(&mut conn)
             .map_err(|e| Status::internal(format!("{e}")))?;
@@ -255,7 +255,7 @@ impl FortressService for MyFortressService {
             .map_err(|e| Status::internal(format!("{e}")))?;
         let fortress = diesel::insert_into(fortresses::table)
             .values(new_fortress)
-            .returning(rusty::models::Fortress::as_returning())
+            .returning(Fortress::as_returning())
             .get_result(&mut conn)
             .map_err(|e| Status::internal(format!("{e}")))?;
         let fortress = CreateFortressResponse {
@@ -274,7 +274,7 @@ impl FortressService for MyFortressService {
             .pool
             .get()
             .map_err(|e| Status::internal(format!("{e}")))?;
-        let fortress: rusty::models::Fortress = fortresses::table
+        let fortress: Fortress = fortresses::table
             .filter(fortresses::id.eq(fortress_id))
             .get_result(&mut conn)
             .map_err(|e| Status::not_found(format!("{e}")))?;
@@ -302,7 +302,7 @@ impl FortressService for MyFortressService {
         let fortress = diesel::update(fortresses::table)
             .filter(fortresses::id.eq(fortress_id))
             .set(update_fortress)
-            .returning(rusty::models::Fortress::as_returning())
+            .returning(Fortress::as_returning())
             .get_result(&mut conn)
             .map_err(|e| Status::internal(format!("{e}")))?;
         let fortress = UpdateFortressResponse {
@@ -343,7 +343,7 @@ impl FortressService for MyFortressService {
             .pool
             .get()
             .map_err(|e| Status::internal(format!("{e}")))?;
-        let fortresses: Vec<rusty::models::Fortress> = fortresses::table
+        let fortresses: Vec<Fortress> = fortresses::table
             .get_results(&mut conn)
             .map_err(|e| Status::internal(format!("{e}")))?;
         let fortresses = ListFortressesResponse {

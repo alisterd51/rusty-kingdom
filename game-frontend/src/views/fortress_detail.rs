@@ -1,7 +1,9 @@
 use crate::{
     app::{ResourceView, get_client, use_id_param},
-    game::{
-        CollectFortressRequest, GetFortressRequest, fortress_service_client::FortressServiceClient,
+    pb::game::v1::{
+        CollectFortressEnergyRequest, CollectFortressFoodRequest, CollectFortressGoldRequest,
+        CollectFortressWoodRequest, GetFortressRequest,
+        fortress_service_client::FortressServiceClient,
     },
 };
 use leptos::prelude::*;
@@ -36,12 +38,12 @@ pub fn FortressDetail() -> impl IntoView {
     });
 
     macro_rules! make_collect_action {
-        ($method:ident) => {
+        ($req_type:ident, $method:ident) => {
             Action::new_local(move |id: &i32| {
                 let id = *id;
                 async move {
                     let mut client = FortressServiceClient::new(get_client());
-                    let request = tonic::Request::new(CollectFortressRequest { id });
+                    let request = tonic::Request::new($req_type { id });
                     match client.$method(request).await {
                         Ok(_) => set_refresh_trigger.update(|n| *n += 1),
                         Err(e) => leptos::logging::error!("Collect failed: {}", e),
@@ -50,10 +52,14 @@ pub fn FortressDetail() -> impl IntoView {
             })
         };
     }
-    let collect_gold_action = make_collect_action!(collect_fortress_gold);
-    let collect_food_action = make_collect_action!(collect_fortress_food);
-    let collect_wood_action = make_collect_action!(collect_fortress_wood);
-    let collect_energy_action = make_collect_action!(collect_fortress_energy);
+    let collect_gold_action =
+        make_collect_action!(CollectFortressGoldRequest, collect_fortress_gold);
+    let collect_food_action =
+        make_collect_action!(CollectFortressFoodRequest, collect_fortress_food);
+    let collect_wood_action =
+        make_collect_action!(CollectFortressWoodRequest, collect_fortress_wood);
+    let collect_energy_action =
+        make_collect_action!(CollectFortressEnergyRequest, collect_fortress_energy);
 
     view! {
         <div>

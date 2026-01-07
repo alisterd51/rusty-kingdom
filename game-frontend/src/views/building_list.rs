@@ -1,6 +1,6 @@
 use crate::{
     app::{ResourceView, get_client},
-    game::{ListBuildingsRequest, building_service_client::BuildingServiceClient},
+    pb::game::v1::{ListBuildingsRequest, building_service_client::BuildingServiceClient},
 };
 use leptos::prelude::*;
 use leptos_router::components::A;

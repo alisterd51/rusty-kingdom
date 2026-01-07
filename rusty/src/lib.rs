@@ -4,7 +4,6 @@ pub mod models;
 pub mod schema;
 
 // TODO: create a `Resources` structure and refactor this with `Fortress` resources
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Costs {
     pub gold: i32,
     pub food: i32,

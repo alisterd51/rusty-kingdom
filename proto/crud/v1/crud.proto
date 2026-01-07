@@ -1,0 +1,98 @@
+syntax = "proto3";
+package crud.v1;
+
+import "common/v1/common.proto";
+
+// Building
+
+message CreateBuildingRequest {
+  common.v1.NewBuilding building = 1;
+}
+message CreateBuildingResponse {
+  common.v1.Building building = 1;
+}
+
+message GetBuildingRequest {
+  int32 id = 1;
+}
+message GetBuildingResponse {
+  common.v1.Building building = 1;
+}
+
+message UpdateBuildingRequest {
+  common.v1.UpdateBuilding building = 1;
+}
+message UpdateBuildingResponse {
+  common.v1.Building building = 1;
+}
+
+message DeleteBuildingRequest {
+  int32 id = 1;
+}
+message DeleteBuildingResponse {
+  bool success = 1;
+}
+
+message ListBuildingsRequest {}
+message ListBuildingsResponse {
+  repeated common.v1.Building buildings = 1;
+}
+
+message ListBuildingsByFortressRequest {
+  int32 fortress_id = 1;
+}
+message ListBuildingsByFortressResponse {
+  repeated common.v1.Building buildings = 1;
+}
+
+service BuildingService {
+  rpc CreateBuilding(CreateBuildingRequest) returns (CreateBuildingResponse);
+  rpc GetBuilding(GetBuildingRequest) returns (GetBuildingResponse);
+  rpc UpdateBuilding(UpdateBuildingRequest) returns (UpdateBuildingResponse);
+  rpc DeleteBuilding(DeleteBuildingRequest) returns (DeleteBuildingResponse);
+  rpc ListBuildings(ListBuildingsRequest) returns (ListBuildingsResponse);
+  rpc ListBuildingsByFortress(ListBuildingsByFortressRequest) returns (ListBuildingsByFortressResponse);
+}
+
+// Fortress
+
+message CreateFortressRequest {
+  common.v1.NewFortress fortress = 1;
+}
+message CreateFortressResponse {
+  common.v1.Fortress fortress = 1;
+}
+
+message GetFortressRequest {
+  int32 id = 1;
+}
+message GetFortressResponse {
+  common.v1.Fortress fortress = 1;
+}
+
+message UpdateFortressRequest {
+  common.v1.UpdateFortress fortress = 1;
+}
+message UpdateFortressResponse {
+  common.v1.Fortress fortress = 1;
+}
+
+message DeleteFortressRequest {
+  int32 id = 1;
+}
+message DeleteFortressResponse {
+  bool success = 1;
+}
+
+message ListFortressesRequest {}
+message ListFortressesResponse {
+  repeated common.v1.Fortress fortresses = 1;
+}
+
+service FortressService {
+  rpc CreateFortress(CreateFortressRequest) returns (CreateFortressResponse);
+  rpc GetFortress(GetFortressRequest) returns (GetFortressResponse);
+  rpc UpdateFortress(UpdateFortressRequest) returns (UpdateFortressResponse);
+  rpc DeleteFortress(DeleteFortressRequest) returns (DeleteFortressResponse);
+  rpc ListFortresses(ListFortressesRequest) returns (ListFortressesResponse);
+}
