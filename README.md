@@ -51,10 +51,12 @@ Cet exemple montre comment est déployé le serveur officiel (accessible via <ht
 
 (Le fichier `.env` est dérivé de `sample.env`.)
 
+(les `hardened-images` nécessitent un `docker login dhi.io`)
+
 ```yaml
 services:
   postgres:
-    image: postgres:18-alpine
+    image: dhi.io/postgres:18-alpine3.22
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -119,7 +121,7 @@ services:
     networks:
       - traefik-network
   traefik:
-    image: traefik:v3.6
+    image: dhi.io/traefik:3.6
     restart: always
     command:
       - "--providers.docker=true"
