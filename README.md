@@ -53,6 +53,8 @@ Cet exemple montre comment est déployé le serveur officiel (accessible via <ht
 
 (les `hardened-images` nécessitent un `docker login dhi.io`)
 
+compose.yaml
+
 ```yaml
 services:
   postgres:
@@ -93,15 +95,6 @@ services:
   game_server:
     image: ghcr.io/alisterd51/rusty-game-server:latest
     restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.game_server.rule=Host(`rusty.anclarma.fr`) && PathPrefix(`/game.`)"
-      - "traefik.http.routers.game_server.entrypoints=websecure"
-      - "traefik.http.routers.game_server.tls=true"
-      - "traefik.http.routers.game_server.tls.certresolver=myresolver"
-      - "traefik.http.services.game_server.loadbalancer.server.port=3000"
-      - "traefik.http.services.game_server.loadbalancer.server.scheme=h2c"
-      - "traefik.docker.network=traefik-network"
     environment:
       CRUD_SERVER_URL: "http://crud_server:3000"
     networks:
@@ -110,37 +103,27 @@ services:
   game_frontend:
     image: ghcr.io/alisterd51/rusty-game-frontend:latest
     restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.game_frontend.rule=Host(`rusty.anclarma.fr`)"
-      - "traefik.http.routers.game_frontend.entrypoints=websecure"
-      - "traefik.http.routers.game_frontend.tls=true"
-      - "traefik.http.routers.game_frontend.tls.certresolver=myresolver"
-      - "traefik.http.services.game_frontend.loadbalancer.server.port=80"
-      - "traefik.docker.network=traefik-network"
     networks:
       - traefik-network
+  init-acme:
+    image: busybox
+    user: root
+    volumes:
+      - acme:/acme:rw
+    command: chown -R 65532:65532 /acme
   traefik:
+    depends_on:
+      init-acme:
+        condition: service_completed_successfully
     image: dhi.io/traefik:3.6
     restart: always
-    command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.websecure.http3"
-      - "--certificatesresolvers.myresolver.acme.email=antoinereims28@gmail.com"
-      - "--certificatesresolvers.myresolver.acme.storage=/acme/acme.json"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
     ports:
       - "80:80"
       - "443:443/tcp"
       - "443:443/udp"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/config/dynamic:/config/dynamic:ro
       - acme:/acme:rw
     networks:
       - traefik-network
@@ -153,6 +136,67 @@ networks:
     external: false
   traefik-network:
     external: false
+```
+
+traefik/traefik.yml
+
+```yaml
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+    http3: {}
+
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: antoinereims28@gmail.com
+      storage: /acme/acme.json
+      httpChallenge:
+        entryPoint: web
+
+providers:
+  file:
+    directory: "/config/dynamic"
+    watch: true
+```
+
+traefik/config/dynamic/routes.yml
+
+```yaml
+http:
+  routers:
+    game-frontend:
+      rule: "Host(`rusty.anclarma.fr`)"
+      service: game-frontend-service
+      entryPoints:
+        - websecure
+      tls:
+        certresolver: myresolver
+    game-server:
+      rule: "Host(`rusty.anclarma.fr`) && PathPrefix(`/game.`)"
+      service: game-server-service
+      entryPoints:
+        - websecure
+      tls:
+        certresolver: myresolver
+
+  services:
+    game-frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://game_frontend:80"
+    game-server-service:
+      loadBalancer:
+        servers:
+          - url: "h2c://game_server:3000"
 ```
 
 ### Exemple avec Kubernetes
