@@ -1,5 +1,6 @@
 use crate::{
     app::{ResourceView, get_client},
+    i18n::{t, use_i18n},
     pb::game::v1::{
         CreateFortressRequest, DeleteFortressRequest, ListFortressesRequest,
         fortress_service_client::FortressServiceClient,
@@ -10,6 +11,7 @@ use leptos_router::components::A;
 
 #[component]
 pub fn FortressList() -> impl IntoView {
+    let i18n = use_i18n();
     let (refresh_trigger, set_refresh_trigger) = signal(0);
     let fortresses_resource = LocalResource::new(move || {
         refresh_trigger.get();
@@ -46,7 +48,7 @@ pub fn FortressList() -> impl IntoView {
 
     view! {
         <div>
-            <h2>"Fortress List"</h2>
+            <h2>{t!(i18n, fortress_list)}</h2>
             <div>
                 <button
                     on:click=move |_| {
@@ -56,9 +58,9 @@ pub fn FortressList() -> impl IntoView {
                 >
                     {move || {
                         if create_action.pending().get() {
-                            "Creating..."
+                            t!(i18n, creating).into_view().into_any()
                         } else {
-                            "Create New Fortress"
+                            t!(i18n, create_new_fortress).into_view().into_any()
                         }
                     }}
                 </button>
@@ -77,7 +79,7 @@ pub fn FortressList() -> impl IntoView {
                                             <A href=format!(
                                                 "/fortresses/{}",
                                                 f.id,
-                                            )>{format!("Fortress #{}", f.id)}</A>
+                                            )>{t!(i18n, fortress)}" #"{f.id}</A>
                                             " "
                                             <button
                                                 on:click=move |_| {
@@ -85,7 +87,7 @@ pub fn FortressList() -> impl IntoView {
                                                 }
                                                 disabled=move || delete_action.pending().get()
                                             >
-                                                "Delete"
+                                                {t!(i18n, delete)}
                                             </button>
                                         </li>
                                     }

@@ -1,88 +1,87 @@
+use crate::i18n::{t, use_i18n};
 use leptos::prelude::*;
 
 #[component]
 pub fn Home() -> impl IntoView {
+    let i18n = use_i18n();
+
     view! {
         <div>
-            <h1>"Rusty-Kingdom Project Presentation"</h1>
+            <h1>{t!(i18n, project_presentation)}</h1>
+            <p>{t!(i18n, project_intro_1)}<br />{t!(i18n, project_intro_2)}</p>
             <p>
-                "This is an incremental, multi-client, bot-friendly, multiplayer game with low latency."
-                <br />
-                "More generally, this project serves as an open-source technology demonstrator focused on performance."
-            </p>
-            <p>
-                <strong>"Note: "</strong>
-                "The gameplay is currently very basic."
+                <strong>{t!(i18n, note_label)}</strong>
+                {t!(i18n, project_intro_note)}
             </p>
 
             <hr />
 
-            <h3>"Current Architecture"</h3>
+            <h3>{t!(i18n, architecture_presentation)}</h3>
 
-            <h4>"Frontends"</h4>
+            <h4>{t!(i18n, frontends)}</h4>
             <ul>
                 <li>
-                    <strong>"Web Client"</strong>
-                    ": Developed in Rust using the "
-                    <code>"Leptos"</code>
-                    " framework, compiled to WebAssembly (WASM) via "
-                    <code>"Trunk"</code>
-                    "."
+                    <strong>{t!(i18n, web_client)}</strong>
+                    {t!(i18n, web_client_desc_1)}
+                    <code>{t!(i18n, leptos)}</code>
+                    {t!(i18n, web_client_desc_2)}
+                    <code>{t!(i18n, trunk)}</code>
+                    {t!(i18n, web_client_desc_3)}
                 </li>
                 <li>
-                    <strong>"CLI Client"</strong>
-                    ": Developed in Rust (using "
-                    <code>"Clap"</code>
-                    " and "
-                    <code>"Serde"</code>
-                    "), designed to facilitate bot scripting via Bash and jq."
+                    <strong>{t!(i18n, cli_client)}</strong>
+                    {t!(i18n, cli_client_desc_1)}
+                    <code>{t!(i18n, clap)}</code>
+                    {t!(i18n, cli_client_desc_2)}
+                    <code>{t!(i18n, serde)}</code>
+                    {t!(i18n, cli_client_desc_3)}
                 </li>
             </ul>
 
-            <h4>"Backend"</h4>
+            <h4>{t!(i18n, backends)}</h4>
             <ul>
                 <li>
-                    <strong>"Main Microservice"</strong>
-                    ": Developed in Rust, communicates with clients via gRPC/gRPC-web and with the CRUD service via gRPC."
+                    <strong>{t!(i18n, main_microservice)}</strong>
+                    {t!(i18n, main_microservice_desc_1)}
                 </li>
                 <li>
-                    <strong>"CRUD Microservice"</strong>
-                    ": Developed in Rust, manages data persistence via gRPC and the "
-                    <code>"Diesel"</code>
-                    " ORM (PostgreSQL)."
+                    <strong>{t!(i18n, crud_microservice)}</strong>
+                    {t!(i18n, crud_microservice_desc_1)}
+                    <code>{t!(i18n, diesel)}</code>
+                    {t!(i18n, crud_microservice_desc_2)}
                 </li>
             </ul>
 
             <hr />
 
-            <h3>"Technologies & Infrastructure"</h3>
+            <h3>{t!(i18n, technologies_infrastructure)}</h3>
 
-            <h4>"Database"</h4>
+            <h4>{t!(i18n, database)}</h4>
             <ul>
-                <li>"PostgreSQL"</li>
-                <li>"(Redis: sidelined for now, negligible performance gain)"</li>
+                <li>{t!(i18n, database_desc_1)}</li>
+                <li>{t!(i18n, database_desc_2)}</li>
             </ul>
 
-            <h4>"CI/CD"</h4>
+            <h4>{t!(i18n, cicd)}</h4>
             <ul>
-                <li>"Docker: Containerization"</li>
-                <li>"GitHub Actions: Tests, compilation, build, and registry publication"</li>
-                <li>"(FluxCD: pending Kubernetes migration for CD)"</li>
+                <li>{t!(i18n, cicd_desc_1)}</li>
+                <li>{t!(i18n, cicd_desc_2)}</li>
+                <li>{t!(i18n, cicd_desc_3)}</li>
             </ul>
 
-            <h4>"Runtime"</h4>
+            <h4>{t!(i18n, runtime)}</h4>
             <ul>
-                <li>"Docker Compose (Migration to Kubernetes in progress)"</li>
-                <li>"Traefik: Reverse proxy and TLS certificate management"</li>
-                <li>"Nginx: Static server for the Web Client"</li>
+                <li>{t!(i18n, runtime_desc_1)}</li>
+                <li>{t!(i18n, runtime_desc_2)}</li>
+                <li>{t!(i18n, runtime_desc_3)}</li>
             </ul>
 
-            <h4>"Other & WIP"</h4>
+            <h4>{t!(i18n, other_wip)}</h4>
             <ul>
-                <li>"Protobuf: Unified data schema between components"</li>
-                <li>"Renovate: Automatic dependency updates"</li>
-                <li>"(OpenTelemetry: Implementation in progress for tracing)"</li>
-                <li>"(Authentication: Currently under consideration)"</li>
+                <li>{t!(i18n, other_wip_desc_1)}</li>
+                <li>{t!(i18n, other_wip_desc_2)}</li>
+                <li>{t!(i18n, other_wip_desc_3)}</li>
+                <li>{t!(i18n, other_wip_desc_4)}</li>
             </ul>
         </div>
     }

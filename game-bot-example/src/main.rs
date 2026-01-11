@@ -1,7 +1,6 @@
 #![allow(clippy::similar_names)]
 
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
+#[allow(clippy::pedantic, clippy::nursery)]
 pub mod pb {
     pub mod common {
         pub mod v1 {

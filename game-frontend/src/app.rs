@@ -1,7 +1,10 @@
-use crate::views::{
-    building_detail::BuildingDetail, building_list::BuildingList,
-    fortress_building_list::FortressBuildingList, fortress_detail::FortressDetail,
-    fortress_list::FortressList, home::Home, nav_menu::NavMenu, not_found::NotFound,
+use crate::{
+    i18n::I18nContextProvider,
+    views::{
+        building_detail::BuildingDetail, building_list::BuildingList,
+        fortress_building_list::FortressBuildingList, fortress_detail::FortressDetail,
+        fortress_list::FortressList, home::Home, nav_menu::NavMenu, not_found::NotFound,
+    },
 };
 use leptos::prelude::*;
 use leptos_router::{
@@ -28,22 +31,27 @@ pub fn use_id_param() -> impl Fn() -> Option<i32> + Copy {
 #[component]
 pub fn App() -> impl IntoView {
     view! {
-        <Router>
-            <div class="app-container">
-                <NavMenu />
+        <I18nContextProvider>
+            <Router>
+                <div class="app-container">
+                    <NavMenu />
 
-                <main>
-                    <Routes fallback=|| view! { <NotFound /> }>
-                        <Route path=path!("/") view=Home />
-                        <Route path=path!("/fortresses") view=FortressList />
-                        <Route path=path!("/fortresses/:id") view=FortressDetail />
-                        <Route path=path!("/fortresses/:id/buildings") view=FortressBuildingList />
-                        <Route path=path!("/buildings") view=BuildingList />
-                        <Route path=path!("/buildings/:id") view=BuildingDetail />
-                    </Routes>
-                </main>
-            </div>
-        </Router>
+                    <main>
+                        <Routes fallback=|| view! { <NotFound /> }>
+                            <Route path=path!("/") view=Home />
+                            <Route path=path!("/fortresses") view=FortressList />
+                            <Route path=path!("/fortresses/:id") view=FortressDetail />
+                            <Route
+                                path=path!("/fortresses/:id/buildings")
+                                view=FortressBuildingList
+                            />
+                            <Route path=path!("/buildings") view=BuildingList />
+                            <Route path=path!("/buildings/:id") view=BuildingDetail />
+                        </Routes>
+                    </main>
+                </div>
+            </Router>
+        </I18nContextProvider>
     }
 }
 

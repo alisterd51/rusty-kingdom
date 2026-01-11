@@ -1,5 +1,6 @@
 use crate::{
     app::{ResourceView, get_client},
+    i18n::{t, use_i18n},
     pb::game::v1::{ListBuildingsRequest, building_service_client::BuildingServiceClient},
 };
 use leptos::prelude::*;
@@ -7,6 +8,7 @@ use leptos_router::components::A;
 
 #[component]
 pub fn BuildingList() -> impl IntoView {
+    let i18n = use_i18n();
     let buildings_resource = LocalResource::new(move || async move {
         let mut client = BuildingServiceClient::new(get_client());
         let request = tonic::Request::new(ListBuildingsRequest {});
@@ -19,7 +21,7 @@ pub fn BuildingList() -> impl IntoView {
 
     view! {
         <div>
-            <h2>"Building List"</h2>
+            <h2>{t!(i18n, building_list)}</h2>
             <ResourceView
                 resource=buildings_resource
                 view=|resp| {
