@@ -1,5 +1,6 @@
 use crate::{
     app::{ResourceView, get_client, use_id_param},
+    i18n::{t, use_i18n},
     pb::game::v1::{
         ListBuildingsByFortressRequest, building_service_client::BuildingServiceClient,
     },
@@ -9,6 +10,7 @@ use leptos_router::components::A;
 
 #[component]
 pub fn FortressBuildingList() -> impl IntoView {
+    let i18n = use_i18n();
     let id_signal = use_id_param();
     let buildings_resource = LocalResource::new(move || {
         let fortress_id = id_signal();
@@ -32,14 +34,22 @@ pub fn FortressBuildingList() -> impl IntoView {
                 {move || {
                     id_signal()
                         .map_or_else(
-                            || "Fortress not found".to_string(),
-                            |id| format!("Buildings for Fortress #{id}"),
+                            || t!(i18n, fortress_not_found).into_view().into_any(),
+                            |id| {
+                                view! {
+                                    {t!(i18n, buildings_for_fortress)}
+                                    " #"
+                                    {id}
+                                }
+                                    .into_view()
+                                    .into_any()
+                            },
                         )
                 }}
             </h2>
             <ResourceView
                 resource=buildings_resource
-                view=|resp| {
+                view=move |resp| {
                     let buildings = resp.buildings;
                     let is_empty = buildings.is_empty();
 
@@ -60,7 +70,11 @@ pub fn FortressBuildingList() -> impl IntoView {
                                 }
                             />
                         </ul>
-                        {if is_empty { Some(view! { <p>"No buildings found."</p> }) } else { None }}
+                        {if is_empty {
+                            Some(view! { <p>{t!(i18n, buildings_not_found)}</p> })
+                        } else {
+                            None
+                        }}
                     }
                 }
             />
@@ -68,9 +82,17 @@ pub fn FortressBuildingList() -> impl IntoView {
             {move || {
                 id_signal()
                     .map_or_else(
-                        || view! { <A href="/fortresses">"Back to Fortress List"</A> }.into_any(),
+                        || {
+                            view! { <A href="/fortresses">{t!(i18n, back_to_fortress_list)}</A> }
+                                .into_any()
+                        },
                         |id| {
-                            view! { <A href=format!("/fortresses/{}", id)>"Back to Fortress"</A> }
+                            view! {
+                                <A href=format!(
+                                    "/fortresses/{}",
+                                    id,
+                                )>{t!(i18n, back_to_fortress)}" #"{id}</A>
+                            }
                                 .into_any()
                         },
                     )

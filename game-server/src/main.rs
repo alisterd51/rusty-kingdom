@@ -18,8 +18,7 @@ use tonic::transport::Server;
 use tonic_web::GrpcWebLayer;
 use tower_http::cors::CorsLayer;
 
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
+#[allow(clippy::pedantic, clippy::nursery)]
 pub mod pb {
     pub mod common {
         pub mod v1 {

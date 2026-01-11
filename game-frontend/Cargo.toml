@@ -7,6 +7,7 @@ edition.workspace = true
 # leptos
 leptos = { version = "0.8", features = ["csr"] }
 leptos_router = "0.8"
+leptos_i18n = { version = "0.6", features = ["csr"] }
 # gRPC / protobuf
 tonic-web-wasm-client = "0.8"
 tonic = { version = "0.14", default-features = false, features = ["codegen"] }
@@ -14,6 +15,9 @@ tonic-prost = "0.14"
 prost = "0.14"
 
 [build-dependencies]
+# leptos
+leptos_i18n_build = { version = "0.6", features = ["csr"] }
+# gRPC / protobuf
 tonic-prost-build = "0.14"
 
 [lints]

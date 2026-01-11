@@ -1,7 +1,6 @@
 #![allow(clippy::must_use_candidate)]
 
-#[allow(clippy::pedantic)]
-#[allow(clippy::nursery)]
+#[allow(clippy::pedantic, clippy::nursery)]
 pub mod pb {
     pub mod common {
         pub mod v1 {
@@ -18,8 +17,10 @@ pub mod pb {
 pub mod app;
 pub mod views;
 
-use app::App;
+include!(concat!(env!("OUT_DIR"), "/i18n/mod.rs"));
 
 fn main() {
+    use app::App;
+
     leptos::mount::mount_to_body(App);
 }

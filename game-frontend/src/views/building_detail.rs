@@ -1,5 +1,6 @@
 use crate::{
     app::{ResourceView, get_client, use_id_param},
+    i18n::{t, use_i18n},
     pb::{
         common::v1::Costs,
         game::v1::{
@@ -13,6 +14,7 @@ use leptos_router::components::A;
 
 #[component]
 pub fn BuildingDetail() -> impl IntoView {
+    let i18n = use_i18n();
     let id_signal = use_id_param();
     let (refresh_trigger, set_refresh_trigger) = signal(0);
     let data_resource = LocalResource::new(move || {
@@ -60,7 +62,7 @@ pub fn BuildingDetail() -> impl IntoView {
 
     view! {
         <div>
-            <h2>"Building Detail"</h2>
+            <h2>{t!(i18n, building_detail)}</h2>
             <ResourceView
                 resource=data_resource
                 view=move |data_opt| {
@@ -68,44 +70,47 @@ pub fn BuildingDetail() -> impl IntoView {
                         Some((b, costs)) => {
                             view! {
                                 <ul>
-                                    <li>"ID: " {b.id}</li>
-                                    <li>"Name: " {b.name}</li>
-                                    <li>"Level: " {b.level}</li>
-                                    <li>"Fortress ID: " {b.fortress_id}</li>
+                                    <li>{t!(i18n, id)} ": " {b.id}</li>
+                                    <li>{t!(i18n, name)} ": " {b.name}</li>
+                                    <li>{t!(i18n, level)} ": " {b.level}</li>
+                                    <li>{t!(i18n, fortress_id)} ": " {b.fortress_id}</li>
                                 </ul>
                                 <UpgradeSection id=b.id costs=costs action=improve_action />
                                 <div>
                                     <A href=format!(
                                         "/fortresses/{}",
                                         b.fortress_id,
-                                    )>{format!("-> Go to Fortress #{}", b.fortress_id)}</A>
+                                    )>{t!(i18n, go_to_fortress)} " #" {b.fortress_id}</A>
                                 </div>
                             }
                                 .into_any()
                         }
-                        None => view! { "No data (Invalid ID or Not Found)" }.into_any(),
+                        None => t!(i18n, no_data).into_view().into_any(),
                     }
                 }
             />
             <br />
-            <A href="/buildings">"Back"</A>
+            <A href="/buildings">{t!(i18n, back_to_buildings)}</A>
         </div>
     }
 }
 
 #[component]
 fn UpgradeSection(id: i32, costs: Option<Costs>, action: Action<i32, ()>) -> impl IntoView {
+    let i18n = use_i18n();
+
     view! {
-        <h3>"Upgrade Building"</h3>
+        <h3>{t!(i18n, upgrade_building)}</h3>
         <div>
             {costs
                 .map_or_else(
-                    || view! { <p>"No costs available"</p> }.into_any(),
+                    || view! { <p>{t!(i18n, costs_not_found)}</p> }.into_any(),
                     |c| {
                         view! {
                             <p>
-                                "Cost: " "Gold: " {c.gold} " " "Food: " {c.food} " " "Wood: "
-                                {c.wood} " " "Energy: " {c.energy}
+                                {t!(i18n, costs)} ": " {t!(i18n, gold)} ": " {c.gold} " "
+                                {t!(i18n, food)} ": " {c.food} " " {t!(i18n, wood)} ": "{c.wood} " "
+                                {t!(i18n, energy)} ": " {c.energy}
                             </p>
                         }
                             .into_any()
@@ -117,7 +122,13 @@ fn UpgradeSection(id: i32, costs: Option<Costs>, action: Action<i32, ()>) -> imp
                 }
                 disabled=move || action.pending().get()
             >
-                {move || { if action.pending().get() { "Upgrading..." } else { "Upgrade" } }}
+                {move || {
+                    if action.pending().get() {
+                        t!(i18n, upgrading).into_view().into_any()
+                    } else {
+                        t!(i18n, upgrade).into_view().into_any()
+                    }
+                }}
             </button>
         </div>
     }

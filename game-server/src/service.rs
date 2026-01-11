@@ -292,7 +292,6 @@ impl BuildingService for MyBuildingService {
     }
 }
 
-#[allow(dead_code)]
 pub struct MyFortressService {
     crud_building_client: BuildingServiceClient<tonic::transport::Channel>,
     crud_fortress_client: FortressServiceClient<tonic::transport::Channel>,
