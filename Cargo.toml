@@ -11,7 +11,7 @@ members = [
 	"migration",
 ]
 
-package.version = "0.10.0"
+package.version = "0.10.1"
 package.edition = "2024"
 
 [workspace.dependencies]

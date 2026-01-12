@@ -13,7 +13,8 @@ fn establish_connection() -> PgConnection {
         .unwrap_or_else(|_| panic!("Error connecting to {database_url}"))
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     let conn = &mut establish_connection();
-    let _ = conn.run_pending_migrations(MIGRATIONS);
+    conn.run_pending_migrations(MIGRATIONS)?;
+    Ok(())
 }
