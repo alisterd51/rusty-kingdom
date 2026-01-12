@@ -1,17 +1,21 @@
 use crate::{
     DbPool,
     pb::crud::v1::{
-        CreateBuildingRequest, CreateBuildingResponse, CreateFortressRequest,
-        CreateFortressResponse, DeleteBuildingRequest, DeleteBuildingResponse,
-        DeleteFortressRequest, DeleteFortressResponse, GetBuildingRequest, GetBuildingResponse,
-        GetFortressRequest, GetFortressResponse, ListBuildingsByFortressRequest,
-        ListBuildingsByFortressResponse, ListBuildingsRequest, ListBuildingsResponse,
-        ListFortressesRequest, ListFortressesResponse, UpdateBuildingRequest,
-        UpdateBuildingResponse, UpdateFortressRequest, UpdateFortressResponse,
+        CollectFortressResourceRequest, CollectFortressResourceResponse, CreateBuildingRequest,
+        CreateBuildingResponse, CreateFortressRequest, CreateFortressResponse,
+        DeleteBuildingRequest, DeleteBuildingResponse, DeleteFortressRequest,
+        DeleteFortressResponse, GetBuildingRequest, GetBuildingResponse, GetFortressRequest,
+        GetFortressResponse, ListBuildingsByFortressRequest, ListBuildingsByFortressResponse,
+        ListBuildingsRequest, ListBuildingsResponse, ListFortressesRequest, ListFortressesResponse,
+        ResourceKind, UpdateBuildingRequest, UpdateBuildingResponse, UpdateFortressRequest,
+        UpdateFortressResponse, UpgradeBuildingAtomicRequest, UpgradeBuildingAtomicResponse,
         building_service_server::BuildingService, fortress_service_server::FortressService,
     },
 };
-use diesel::prelude::*;
+use diesel::{
+    prelude::*,
+    sql_types::{Integer, Text},
+};
 use rusty::{
     models::{Building, Fortress, NewBuilding, NewFortress, UpdateBuilding, UpdateFortress},
     schema::{buildings, fortresses},
@@ -81,6 +85,48 @@ impl From<crate::pb::common::v1::UpdateFortress> for UpdateFortress {
             wood: value.wood,
             energy: value.energy,
         }
+    }
+}
+
+#[derive(diesel::QueryableByName)]
+struct FortressRow {
+    #[diesel(sql_type = Integer)]
+    id: i32,
+    #[diesel(sql_type = Integer)]
+    gold: i32,
+    #[diesel(sql_type = Integer)]
+    food: i32,
+    #[diesel(sql_type = Integer)]
+    wood: i32,
+    #[diesel(sql_type = Integer)]
+    energy: i32,
+}
+
+impl From<FortressRow> for crate::pb::common::v1::Fortress {
+    fn from(v: FortressRow) -> Self {
+        Self {
+            id: v.id,
+            gold: v.gold,
+            food: v.food,
+            wood: v.wood,
+            energy: v.energy,
+        }
+    }
+}
+
+#[derive(Debug)]
+enum UpgradeBuildingAtomicError {
+    Diesel(diesel::result::Error),
+    BuildingNotFound,
+    FortressNotFound,
+    MaxLevel,
+    InsufficientResources,
+    ConcurrentUpdate,
+}
+
+impl From<diesel::result::Error> for UpgradeBuildingAtomicError {
+    fn from(value: diesel::result::Error) -> Self {
+        Self::Diesel(value)
     }
 }
 
@@ -225,6 +271,106 @@ impl BuildingService for MyBuildingService {
 
         Ok(Response::new(buildings))
     }
+
+    async fn upgrade_building_atomic(
+        &self,
+        request: Request<UpgradeBuildingAtomicRequest>,
+    ) -> Result<Response<UpgradeBuildingAtomicResponse>, Status> {
+        let req = request.into_inner();
+        let building_id = req.building_id;
+        let max_building_level = req.max_building_level;
+        if max_building_level <= 0 {
+            return Err(Status::invalid_argument("max_building_level must be > 0"));
+        }
+        let costs = req
+            .costs
+            .ok_or_else(|| Status::invalid_argument("missing costs field"))?;
+        if costs.gold < 0 || costs.food < 0 || costs.wood < 0 || costs.energy < 0 {
+            return Err(Status::invalid_argument("costs must be non-negative"));
+        }
+        let expected_level = req.expected_building_level;
+        let mut conn = self
+            .pool
+            .get()
+            .map_err(|e| Status::internal(format!("{e}")))?;
+        let result: Result<(Fortress, Building), UpgradeBuildingAtomicError> =
+            conn.transaction(|conn| {
+                let building = buildings::table
+                    .filter(buildings::id.eq(building_id))
+                    .select(Building::as_select())
+                    .first(conn)
+                    .optional()?
+                    .ok_or(UpgradeBuildingAtomicError::BuildingNotFound)?;
+                if let Some(expected) = expected_level
+                    && expected != building.level
+                {
+                    return Err(UpgradeBuildingAtomicError::ConcurrentUpdate);
+                }
+                if building.level >= max_building_level {
+                    return Err(UpgradeBuildingAtomicError::MaxLevel);
+                }
+                let fortress_id = building.fortress_id;
+                let fortress = diesel::update(fortresses::table)
+                    .filter(fortresses::id.eq(fortress_id))
+                    .filter(fortresses::gold.ge(costs.gold))
+                    .filter(fortresses::food.ge(costs.food))
+                    .filter(fortresses::wood.ge(costs.wood))
+                    .filter(fortresses::energy.ge(costs.energy))
+                    .set((
+                        fortresses::gold.eq(fortresses::gold - costs.gold),
+                        fortresses::food.eq(fortresses::food - costs.food),
+                        fortresses::wood.eq(fortresses::wood - costs.wood),
+                        fortresses::energy.eq(fortresses::energy - costs.energy),
+                    ))
+                    .returning(Fortress::as_returning())
+                    .get_result(conn)
+                    .optional()?;
+                let Some(fortress) = fortress else {
+                    let exists = fortresses::table
+                        .filter(fortresses::id.eq(fortress_id))
+                        .select(Fortress::as_select())
+                        .first(conn)
+                        .optional()?;
+                    if exists.is_some() {
+                        return Err(UpgradeBuildingAtomicError::InsufficientResources);
+                    }
+                    return Err(UpgradeBuildingAtomicError::FortressNotFound);
+                };
+                let upgraded_building = diesel::update(buildings::table)
+                    .filter(buildings::id.eq(building_id))
+                    .filter(buildings::level.eq(building.level))
+                    .set(buildings::level.eq(buildings::level + 1))
+                    .returning(Building::as_returning())
+                    .get_result(conn)
+                    .optional()?
+                    .ok_or(UpgradeBuildingAtomicError::ConcurrentUpdate)?;
+
+                Ok((fortress, upgraded_building))
+            });
+
+        match result {
+            Ok((fortress, building)) => Ok(Response::new(UpgradeBuildingAtomicResponse {
+                fortress: Some(fortress.into()),
+                building: Some(building.into()),
+            })),
+            Err(UpgradeBuildingAtomicError::BuildingNotFound) => {
+                Err(Status::not_found("building not found"))
+            }
+            Err(UpgradeBuildingAtomicError::FortressNotFound) => {
+                Err(Status::not_found("fortress not found"))
+            }
+            Err(UpgradeBuildingAtomicError::MaxLevel) => {
+                Err(Status::failed_precondition("building already at max level"))
+            }
+            Err(UpgradeBuildingAtomicError::InsufficientResources) => {
+                Err(Status::failed_precondition("insufficient resources"))
+            }
+            Err(UpgradeBuildingAtomicError::ConcurrentUpdate) => {
+                Err(Status::aborted("concurrent update; retry"))
+            }
+            Err(UpgradeBuildingAtomicError::Diesel(_e)) => Err(Status::internal("db error")),
+        }
+    }
 }
 
 pub struct MyFortressService {
@@ -351,5 +497,83 @@ impl FortressService for MyFortressService {
         };
 
         Ok(Response::new(fortresses))
+    }
+
+    async fn collect_fortress_resource(
+        &self,
+        request: Request<CollectFortressResourceRequest>,
+    ) -> Result<Response<CollectFortressResourceResponse>, Status> {
+        let req = request.into_inner();
+        let fortress_id = req.id;
+        let bonus_building_name = req.bonus_building_name;
+        let base = req.base.unwrap_or(1);
+        let resource = ResourceKind::try_from(req.resource)
+            .map_err(|_| Status::invalid_argument("invalid resource kind"))?;
+        let sql = match resource {
+            ResourceKind::Gold => {
+                r"
+                UPDATE fortresses
+                SET gold = gold + $2
+                    + COALESCE((SELECT SUM(level)::int
+                                FROM buildings
+                                WHERE fortress_id = $1 AND name = $3), 0)
+                WHERE id = $1
+                RETURNING id, gold, food, wood, energy
+            "
+            }
+            ResourceKind::Food => {
+                r"
+                UPDATE fortresses
+                SET food = food + $2
+                    + COALESCE((SELECT SUM(level)::int
+                                FROM buildings
+                                WHERE fortress_id = $1 AND name = $3), 0)
+                WHERE id = $1
+                RETURNING id, gold, food, wood, energy
+            "
+            }
+            ResourceKind::Wood => {
+                r"
+                UPDATE fortresses
+                SET wood = wood + $2
+                    + COALESCE((SELECT SUM(level)::int
+                                FROM buildings
+                                WHERE fortress_id = $1 AND name = $3), 0)
+                WHERE id = $1
+                RETURNING id, gold, food, wood, energy
+            "
+            }
+            ResourceKind::Energy => {
+                r"
+                UPDATE fortresses
+                SET energy = energy + $2
+                    + COALESCE((SELECT SUM(level)::int
+                                FROM buildings
+                                WHERE fortress_id = $1 AND name = $3), 0)
+                WHERE id = $1
+                RETURNING id, gold, food, wood, energy
+            "
+            }
+            ResourceKind::Unspecified => {
+                return Err(Status::invalid_argument("resource kind is required"));
+            }
+        };
+        let mut conn = self
+            .pool
+            .get()
+            .map_err(|e| Status::internal(format!("{e}")))?;
+        let fortress_row: FortressRow = diesel::sql_query(sql)
+            .bind::<Integer, _>(fortress_id)
+            .bind::<Integer, _>(base)
+            .bind::<Text, _>(bonus_building_name)
+            .get_result(&mut conn)
+            .map_err(|e| match e {
+                diesel::result::Error::NotFound => Status::not_found("fortress not found"),
+                _ => Status::internal("db error"),
+            })?;
+
+        Ok(Response::new(CollectFortressResourceResponse {
+            fortress: Some(fortress_row.into()),
+        }))
     }
 }

@@ -23,7 +23,7 @@ Rusty Kingdom est un jeu de gestion avec quelques subtilités :
 ### Install
 
 ```bash
-wget https://github.com/alisterd51/rusty-kingdom/releases/download/v0.7.0/game-client
+wget https://github.com/alisterd51/rusty-kingdom/releases/download/v0.11.0/game-client
 chmod +x ./game-client
 source <(./game-client completions bash)
 ./game-client --version
