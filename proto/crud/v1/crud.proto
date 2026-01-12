@@ -45,6 +45,18 @@ message ListBuildingsByFortressResponse {
   repeated common.v1.Building buildings = 1;
 }
 
+message UpgradeBuildingAtomicRequest {
+  int32 building_id = 1;
+  common.v1.Costs costs = 2;
+  optional int32 expected_building_level = 3;
+  int32 max_building_level = 4;
+}
+
+message UpgradeBuildingAtomicResponse {
+  common.v1.Fortress fortress = 1;
+  common.v1.Building building = 2;
+}
+
 service BuildingService {
   rpc CreateBuilding(CreateBuildingRequest) returns (CreateBuildingResponse);
   rpc GetBuilding(GetBuildingRequest) returns (GetBuildingResponse);
@@ -52,9 +64,18 @@ service BuildingService {
   rpc DeleteBuilding(DeleteBuildingRequest) returns (DeleteBuildingResponse);
   rpc ListBuildings(ListBuildingsRequest) returns (ListBuildingsResponse);
   rpc ListBuildingsByFortress(ListBuildingsByFortressRequest) returns (ListBuildingsByFortressResponse);
+  rpc UpgradeBuildingAtomic(UpgradeBuildingAtomicRequest) returns (UpgradeBuildingAtomicResponse);
 }
 
 // Fortress
+
+enum ResourceKind {
+  RESOURCE_KIND_UNSPECIFIED = 0;
+  RESOURCE_KIND_GOLD = 1;
+  RESOURCE_KIND_FOOD = 2;
+  RESOURCE_KIND_WOOD = 3;
+  RESOURCE_KIND_ENERGY = 4;
+}
 
 message CreateFortressRequest {
   common.v1.NewFortress fortress = 1;
@@ -89,10 +110,22 @@ message ListFortressesResponse {
   repeated common.v1.Fortress fortresses = 1;
 }
 
+message CollectFortressResourceRequest {
+  int32 id = 1;
+  ResourceKind resource = 2;
+  string bonus_building_name = 3;
+  optional int32 base = 4;
+}
+
+message CollectFortressResourceResponse {
+  common.v1.Fortress fortress = 1;
+}
+
 service FortressService {
   rpc CreateFortress(CreateFortressRequest) returns (CreateFortressResponse);
   rpc GetFortress(GetFortressRequest) returns (GetFortressResponse);
   rpc UpdateFortress(UpdateFortressRequest) returns (UpdateFortressResponse);
   rpc DeleteFortress(DeleteFortressRequest) returns (DeleteFortressResponse);
   rpc ListFortresses(ListFortressesRequest) returns (ListFortressesResponse);
+  rpc CollectFortressResource(CollectFortressResourceRequest) returns (CollectFortressResourceResponse);
 }
