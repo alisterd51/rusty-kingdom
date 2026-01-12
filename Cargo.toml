@@ -1,3 +1,5 @@
+cargo-features = ["panic-immediate-abort"]
+
 [workspace]
 resolver = "3"
 members = [
@@ -77,7 +79,7 @@ unwrap_in_result = "deny"
 panic_in_result_fn = "deny"
 
 [profile.release]
-panic = "abort"
+panic = "immediate-abort"
 codegen-units = 1
 lto = true
 strip = true
