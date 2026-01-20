@@ -106,7 +106,7 @@ services:
     networks:
       - traefik-network
   init-acme:
-    image: busybox
+    image: dhi.io/busybox:1.37-dev
     user: root
     volumes:
       - acme:/acme:rw

@@ -40,6 +40,6 @@ COPY --from=build-game-server /target/release/game-server /game-server
 EXPOSE 3000
 CMD [ "/game-server" ]
 
-FROM dhi.io/nginx:1.29-alpine3.21 AS runtime-game-frontend
+FROM dhi.io/nginx:1.29-alpine3.23 AS runtime-game-frontend
 COPY ./game-frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build-game-frontend /game-frontend/dist /usr/share/nginx/html
