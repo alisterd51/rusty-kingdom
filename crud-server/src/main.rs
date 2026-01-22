@@ -28,6 +28,23 @@ use tonic::transport::Server;
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
+async fn shutdown_signal() {
+    let sigterm = signal(SignalKind::terminate());
+    let sigint = signal(SignalKind::interrupt());
+
+    match (sigterm, sigint) {
+        (Ok(mut term), Ok(mut int)) => {
+            tokio::select! {
+                _ = term.recv() => println!("SIGTERM received"),
+                _ = int.recv() => println!("SIGINT received"),
+            };
+        }
+        (Err(e), _) | (_, Err(e)) => {
+            eprintln!("Failed to setup signal handler: {e}");
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::]:3000".parse()?;
@@ -38,22 +55,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let building_service = MyBuildingService::new(pool.clone());
     let fortress_service = MyFortressService::new(pool.clone());
 
-    let shutdown_signal = async {
-        let mut sigterm = signal(SignalKind::terminate()).unwrap();
-        let mut sigint = signal(SignalKind::interrupt()).unwrap();
-
-        tokio::select! {
-            _ = sigterm.recv() => {
-            }
-            _ = sigint.recv() => {
-            }
-        }
-    };
+    println!("Listening on {addr}");
 
     Server::builder()
         .add_service(BuildingServiceServer::new(building_service))
         .add_service(FortressServiceServer::new(fortress_service))
-        .serve_with_shutdown(addr, shutdown_signal)
+        .serve_with_shutdown(addr, shutdown_signal())
         .await?;
 
     Ok(())

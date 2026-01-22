@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used)]
+
 use leptos_i18n_build::{
     Config, FileFormat, ParseOptions, TranslationsInfos, options::CodegenOptions,
 };
@@ -19,7 +21,7 @@ fn prost_build() -> Result<(), Box<dyn std::error::Error>> {
 
 fn i18n_build() -> Result<(), Box<dyn std::error::Error>> {
     let i18n_mod_directory = PathBuf::from(std::env::var_os("OUT_DIR").unwrap()).join("i18n");
-    let attributes = "#![allow(clippy::pedantic, clippy::nursery)]".parse()?;
+    let attributes = "#![allow(clippy::pedantic, clippy::nursery, clippy::expect_used)]".parse()?;
     let codegen_options = CodegenOptions::default().top_level_attributes(Some(attributes));
     let parse_options = ParseOptions::default().file_format(FileFormat::Toml);
     let cfg = Config::new("en")?

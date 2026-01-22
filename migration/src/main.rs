@@ -1,20 +1,21 @@
 use diesel::{Connection, PgConnection};
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
-use std::env;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("../rusty/migrations/");
 
-/// # Panics
-///
-/// Will panic if `DATABASE_URL` is not set or invalide
-fn establish_connection() -> PgConnection {
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {database_url}"))
+fn establish_connection() -> Result<PgConnection, Box<dyn std::error::Error>> {
+    let database_url = std::env::var("DATABASE_URL").map_err(|_| "DATABASE_URL must be set")?;
+    let conn = PgConnection::establish(&database_url).map_err(|e| format!("{e}"))?;
+
+    Ok(conn)
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
-    let conn = &mut establish_connection();
-    conn.run_pending_migrations(MIGRATIONS)?;
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let conn = &mut establish_connection()?;
+
+    conn.run_pending_migrations(MIGRATIONS)
+        .map_err(|e| format!("Migration failed: {e}"))?;
+    println!("Migrations applied successfully");
+
     Ok(())
 }
