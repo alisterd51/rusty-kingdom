@@ -571,7 +571,7 @@ checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 
 [[package]]
 name = "crud-client"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "prost",
  "tokio",
@@ -582,7 +582,7 @@ dependencies = [
 
 [[package]]
 name = "crud-server"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "diesel",
  "prost",
@@ -1109,7 +1109,7 @@ dependencies = [
 
 [[package]]
 name = "game-bot-example"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "prost",
  "tokio",
@@ -1120,7 +1120,7 @@ dependencies = [
 
 [[package]]
 name = "game-client"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "clap",
  "clap_complete",
@@ -1135,7 +1135,7 @@ dependencies = [
 
 [[package]]
 name = "game-frontend"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "leptos",
  "leptos_i18n",
@@ -1150,7 +1150,7 @@ dependencies = [
 
 [[package]]
 name = "game-server"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "prost",
  "tokio",
@@ -2427,7 +2427,7 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 
 [[package]]
 name = "migration"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "diesel",
  "diesel_migrations",
@@ -3204,7 +3204,7 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
 name = "rusty"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "diesel",
 ]

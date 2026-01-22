@@ -37,6 +37,23 @@ pub mod pb {
     }
 }
 
+async fn shutdown_signal() {
+    let sigterm = signal(SignalKind::terminate());
+    let sigint = signal(SignalKind::interrupt());
+
+    match (sigterm, sigint) {
+        (Ok(mut term), Ok(mut int)) => {
+            tokio::select! {
+                _ = term.recv() => println!("SIGTERM received"),
+                _ = int.recv() => println!("SIGINT received"),
+            };
+        }
+        (Err(e), _) | (_, Err(e)) => {
+            eprintln!("Failed to setup signal handler: {e}");
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::]:3000".parse()?;
@@ -44,21 +61,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::env::var("CRUD_SERVER_URL").map_err(|e| format!("CRUD_SERVER_URL {e}"))?;
     let crud_building_client = BuildingServiceClient::connect(crud_server_url.clone()).await?;
     let crud_fortress_client = FortressServiceClient::connect(crud_server_url.clone()).await?;
-
     let building_service =
         MyBuildingService::new(crud_building_client.clone(), crud_fortress_client.clone());
     let fortress_service =
         MyFortressService::new(crud_building_client.clone(), crud_fortress_client.clone());
 
-    let shutdown_signal = async {
-        let mut sigterm = signal(SignalKind::terminate()).unwrap();
-        let mut sigint = signal(SignalKind::interrupt()).unwrap();
-
-        tokio::select! {
-            _ = sigterm.recv() => {}
-            _ = sigint.recv() => {}
-        }
-    };
+    println!("Listening on {addr}");
 
     Server::builder()
         .accept_http1(true)
@@ -66,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .layer(GrpcWebLayer::new())
         .add_service(BuildingServiceServer::new(building_service))
         .add_service(FortressServiceServer::new(fortress_service))
-        .serve_with_shutdown(addr, shutdown_signal)
+        .serve_with_shutdown(addr, shutdown_signal())
         .await?;
 
     Ok(())
