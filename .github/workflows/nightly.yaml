@@ -1,4 +1,4 @@
-name: Nightly Container Build
+name: Nightly
 
 on:
   workflow_dispatch:
@@ -6,7 +6,49 @@ on:
     - cron: '42 23 * * *'
 
 jobs:
-  build:
+  prerelease:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: install deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
+      - name: Build BIN
+        run: |
+          cargo build --release
+      - name: Create nightly tag
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/nightly',
+              sha: context.sha
+            }).catch(err => {
+              if (err.status !== 422) throw err;
+              github.rest.git.updateRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'tags/nightly',
+                sha: context.sha
+              });
+            })
+      - name: Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        with:
+          files: |
+            target/release/crud-client
+            target/release/crud-server
+            target/release/game-client
+            target/release/game-server
+            target/release/migration
+          prerelease: true
+          name: nightly
+          tag_name: nightly
+
+  container-build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
