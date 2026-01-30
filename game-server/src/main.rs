@@ -60,11 +60,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let crud_server_url =
         std::env::var("CRUD_SERVER_URL").map_err(|e| format!("CRUD_SERVER_URL {e}"))?;
     let crud_building_client = BuildingServiceClient::connect(crud_server_url.clone()).await?;
-    let crud_fortress_client = FortressServiceClient::connect(crud_server_url.clone()).await?;
-    let building_service =
-        MyBuildingService::new(crud_building_client.clone(), crud_fortress_client.clone());
-    let fortress_service =
-        MyFortressService::new(crud_building_client.clone(), crud_fortress_client.clone());
+    let crud_fortress_client = FortressServiceClient::connect(crud_server_url).await?;
+    let building_service = MyBuildingService::new(crud_building_client.clone());
+    let fortress_service = MyFortressService::new(crud_building_client, crud_fortress_client);
 
     println!("Listening on {addr}");
 

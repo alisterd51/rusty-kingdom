@@ -23,13 +23,14 @@ use crate::pb::{
 use tonic::{Request, Response, Status};
 
 const MAX_BUILDING_LEVEL: i32 = 20;
+const BASE_COST: i32 = 10;
 const GOLD_BONUS_BUILDING: &str = "bank";
 const FOOD_BONUS_BUILDING: &str = "farm";
 const WOOD_BONUS_BUILDING: &str = "sawmill";
 const ENERGY_BONUS_BUILDING: &str = "sanctuary";
 
 fn upgrade_cost(level: i32, base: i32, factor: f64) -> f64 {
-    let level = if level < 1 { 1 } else { level };
+    let level = level.max(1);
     f64::from(base) * factor.powf(f64::from(level - 1))
 }
 
@@ -39,8 +40,8 @@ fn optimize_factor(level_max: i32, base: i32, cost_max: i32) -> f64 {
 
 #[allow(clippy::cast_possible_truncation)]
 fn get_costs(level: i32, level_max: i32) -> Costs {
-    let factor = optimize_factor(level_max, 10, i32::MAX);
-    let cost = upgrade_cost(level, 10, factor) as i32;
+    let factor = optimize_factor(level_max, BASE_COST, i32::MAX);
+    let cost = upgrade_cost(level, BASE_COST, factor) as i32;
 
     Costs {
         gold: cost / 2,
@@ -50,20 +51,16 @@ fn get_costs(level: i32, level_max: i32) -> Costs {
     }
 }
 
-#[allow(dead_code)]
 pub struct MyBuildingService {
     crud_building_client: BuildingServiceClient<tonic::transport::Channel>,
-    crud_fortress_client: FortressServiceClient<tonic::transport::Channel>,
 }
 
 impl MyBuildingService {
     pub const fn new(
         crud_building_client: BuildingServiceClient<tonic::transport::Channel>,
-        crud_fortress_client: FortressServiceClient<tonic::transport::Channel>,
     ) -> Self {
         Self {
             crud_building_client,
-            crud_fortress_client,
         }
     }
 }
@@ -82,10 +79,10 @@ impl BuildingService for MyBuildingService {
             .clone()
             .get_building(crud_request)
             .await?;
-        let buildings = GetBuildingResponse {
+        let response = GetBuildingResponse {
             building: building.into_inner().building,
         };
-        Ok(Response::new(buildings))
+        Ok(Response::new(response))
     }
 
     async fn list_buildings(
@@ -218,29 +215,29 @@ impl FortressService for MyFortressService {
             .into_inner()
             .fortress
             .ok_or_else(|| Status::not_found("fortress not found"))?;
-        let new_buildings = vec![
+        let new_buildings = [
             NewBuilding {
-                name: "bank".to_string(),
+                name: GOLD_BONUS_BUILDING.to_string(),
                 level: 0,
                 fortress_id: fortress.id,
             },
             NewBuilding {
-                name: "farm".to_string(),
+                name: FOOD_BONUS_BUILDING.to_string(),
                 level: 0,
                 fortress_id: fortress.id,
             },
             NewBuilding {
-                name: "sawmill".to_string(),
+                name: WOOD_BONUS_BUILDING.to_string(),
                 level: 0,
                 fortress_id: fortress.id,
             },
             NewBuilding {
-                name: "sanctuary".to_string(),
+                name: ENERGY_BONUS_BUILDING.to_string(),
                 level: 0,
                 fortress_id: fortress.id,
             },
         ];
-        let mut buildings = vec![];
+        let mut buildings = Vec::with_capacity(new_buildings.len());
         for new_building in new_buildings {
             let create_building_request = crate::pb::crud::v1::CreateBuildingRequest {
                 building: Some(new_building),
@@ -499,68 +496,64 @@ mod tests {
 
     #[test]
     fn test_optimize_factor() {
-        const BASE: i32 = 10;
-        let cost_max: i32 = i32::MAX;
-        let levels: Vec<i32> = vec![10, 50, 100, 200, 1000];
+        let cost_max = i32::MAX;
+        let levels = [10, 50, 100, 200, 1000];
 
         for level in levels {
-            let factor = optimize_factor(level, BASE, cost_max);
-            println!("level max: {level}, base: {BASE}, factor: {factor}");
+            let factor = optimize_factor(level, BASE_COST, cost_max);
+            println!("level max: {level}, base: {BASE_COST}, factor: {factor}");
             assert!(factor >= 1.0);
         }
     }
 
     #[test]
     fn test_upgrade_cost() {
-        const BASE: i32 = 10;
         const FACTOR: f64 = 1.1012;
-        let result = upgrade_cost(0, BASE, FACTOR) as i32;
+        let result = upgrade_cost(0, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 10);
-        let result = upgrade_cost(1, BASE, FACTOR) as i32;
+        let result = upgrade_cost(1, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 10);
-        let result = upgrade_cost(2, BASE, FACTOR) as i32;
+        let result = upgrade_cost(2, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 11);
-        let result = upgrade_cost(3, BASE, FACTOR) as i32;
+        let result = upgrade_cost(3, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 12);
-        let result = upgrade_cost(4, BASE, FACTOR) as i32;
+        let result = upgrade_cost(4, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 13);
-        let result = upgrade_cost(5, BASE, FACTOR) as i32;
+        let result = upgrade_cost(5, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 14);
-        let result = upgrade_cost(50, BASE, FACTOR) as i32;
+        let result = upgrade_cost(50, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 1125);
-        let result = upgrade_cost(100, BASE, FACTOR) as i32;
+        let result = upgrade_cost(100, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 139557);
-        let result = upgrade_cost(150, BASE, FACTOR) as i32;
+        let result = upgrade_cost(150, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 17300721);
-        let result = upgrade_cost(200, BASE, FACTOR) as i32;
+        let result = upgrade_cost(200, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 2144738468);
     }
 
     #[test]
     fn test_upgrade_cost_overflow() {
-        const BASE: i32 = 10;
         const FACTOR: f64 = 1.1012;
-        let result = upgrade_cost(250, BASE, FACTOR) as i32;
+        let result = upgrade_cost(250, BASE_COST, FACTOR) as i32;
         assert_eq!(result, i32::MAX);
-        let result = upgrade_cost(1000, BASE, FACTOR) as i32;
+        let result = upgrade_cost(1000, BASE_COST, FACTOR) as i32;
         assert_eq!(result, i32::MAX);
-        let result = upgrade_cost(i32::MAX, BASE, FACTOR) as i32;
+        let result = upgrade_cost(i32::MAX, BASE_COST, FACTOR) as i32;
         assert_eq!(result, i32::MAX);
     }
 
     #[test]
     fn test_level_slice() {
-        const BASE: i32 = 10;
-        let cost_max: i32 = i32::MAX;
-        let levels: Vec<i32> = vec![10, 50, 100, 200, 1000];
+        let cost_max = i32::MAX;
+        let levels = [10, 50, 100, 200, 1000];
 
         for level in levels {
-            let factor = optimize_factor(level, BASE, cost_max);
-            let result_min = upgrade_cost(1, BASE, factor) as i32;
-            let result_max = upgrade_cost(level, BASE, factor) as i32;
+            let factor = optimize_factor(level, BASE_COST, cost_max);
+            let result_min = upgrade_cost(1, BASE_COST, factor) as i32;
+            let result_max = upgrade_cost(level, BASE_COST, factor) as i32;
             println!("{}: {} -> {}: {}", 1, result_min, level, result_max);
-            assert!(BASE <= result_min && result_min <= cost_max);
-            assert!(BASE <= result_max && result_max <= cost_max);
+            assert!(BASE_COST <= result_min && result_min <= cost_max);
+            assert!(BASE_COST <= result_max && result_max <= cost_max);
             assert!(result_min <= result_max);
         }
     }

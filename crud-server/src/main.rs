@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pool = Pool::builder().build(manager)?;
     let pool = Arc::new(pool);
     let building_service = MyBuildingService::new(pool.clone());
-    let fortress_service = MyFortressService::new(pool.clone());
+    let fortress_service = MyFortressService::new(pool);
 
     println!("Listening on {addr}");
 

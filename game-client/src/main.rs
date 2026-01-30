@@ -85,12 +85,7 @@ enum FortressCommands {
 }
 
 fn print_completions<G: Generator>(generator: G, cmd: &mut Command) {
-    generate(
-        generator,
-        cmd,
-        cmd.get_name().to_string(),
-        &mut io::stdout(),
-    );
+    generate(generator, cmd, cmd.get_name().to_owned(), &mut io::stdout());
 }
 
 async fn handle_fortress(
@@ -111,16 +106,17 @@ async fn handle_fortress(
                 .create_fortress(CreateFortressRequest {})
                 .await?
                 .into_inner();
-            println!("{}{}", json!(response.fortress), json!(response.buildings));
+            println!(
+                "{}",
+                json!({"fortress": response.fortress, "buildings": response.buildings})
+            );
         }
         FortressCommands::Get { fortress_id } => {
             let response = fortress_client
                 .get_fortress(GetFortressRequest { id: fortress_id })
                 .await?
                 .into_inner();
-            let fortress = response
-                .fortress
-                .ok_or_else(|| "fortress not found".to_string())?;
+            let fortress = response.fortress.ok_or("fortress not found")?;
             println!("{}", json!(fortress));
         }
         FortressCommands::Delete { fortress_id } => {
@@ -221,7 +217,10 @@ async fn handle_building(
                 .improve_building(ImproveBuildingRequest { id: building_id })
                 .await?
                 .into_inner();
-            println!("{}{}", json!(response.fortress), json!(response.building));
+            println!(
+                "{}",
+                json!({"fortress": response.fortress, "building": response.building})
+            );
         }
         BuildingCommands::GetImproveCosts { building_id } => {
             let response = building_client
@@ -243,7 +242,7 @@ async fn handle_bench(
         .await?
         .into_inner()
         .fortress
-        .ok_or_else(|| "fortress not found".to_string())?;
+        .ok_or("fortress not found")?;
     let request = CollectFortressGoldRequest { id: fortress.id };
     for _ in 0..size {
         fortress_client.collect_fortress_gold(request).await?;
@@ -266,17 +265,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     match args.cmd {
         Commands::Fortress { cmd } => {
             let mut game_building_client = BuildingServiceClient::connect(args.url.clone()).await?;
-            let mut game_fortress_client = FortressServiceClient::connect(args.url.clone()).await?;
+            let mut game_fortress_client = FortressServiceClient::connect(args.url).await?;
 
             handle_fortress(&mut game_fortress_client, &mut game_building_client, cmd).await?;
         }
         Commands::Building { cmd } => {
-            let mut game_building_client = BuildingServiceClient::connect(args.url.clone()).await?;
+            let mut game_building_client = BuildingServiceClient::connect(args.url).await?;
 
             handle_building(&mut game_building_client, cmd).await?;
         }
         Commands::Bench { size } => {
-            let mut game_fortress_client = FortressServiceClient::connect(args.url.clone()).await?;
+            let mut game_fortress_client = FortressServiceClient::connect(args.url).await?;
 
             handle_bench(&mut game_fortress_client, size).await?;
         }
