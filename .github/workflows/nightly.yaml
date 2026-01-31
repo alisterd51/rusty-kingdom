@@ -54,18 +54,30 @@ jobs:
   container-build:
     strategy:
       matrix:
-        container:
-          - crud-server
-          - game-server
-          - game-frontend
-          - migration
-        arch:
-          - amd64
-          - arm64
         include:
-          - arch: amd64
+          - container: crud-server
+            arch: amd64
             runner: ubuntu-24.04
-          - arch: arm64
+          - container: crud-server
+            arch: arm64
+            runner: ubuntu-24.04-arm64
+          - container: game-server
+            arch: amd64
+            runner: ubuntu-24.04
+          - container: game-server
+            arch: arm64
+            runner: ubuntu-24.04-arm64
+          - container: game-frontend
+            arch: amd64
+            runner: ubuntu-24.04
+          - container: game-frontend
+            arch: arm64
+            runner: ubuntu-24.04-arm64
+          - container: migration
+            arch: amd64
+            runner: ubuntu-24.04
+          - container: migration
+            arch: arm64
             runner: ubuntu-24.04-arm64
     runs-on: ${{ matrix.runner }}
     permissions:
