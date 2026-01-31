@@ -1,0 +1,148 @@
+name: Rust CI
+
+on:
+  workflow_call:
+    inputs:
+      rust-version:
+        required: true
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Install Rust ${{ inputs.rust-version }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ inputs.rust-version }}
+          components: rustfmt
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ inputs.rust-version }}
+      - name: Format
+        run: cargo fmt --check
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Install Rust ${{ inputs.rust-version }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ inputs.rust-version }}
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ inputs.rust-version }}
+      - name: install deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
+      - name: cargo check
+        run: cargo check
+
+  fix:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Install Rust ${{ inputs.rust-version }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ inputs.rust-version }}
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ inputs.rust-version }}
+      - name: install deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
+      - name: cargo fix
+        run: |
+          cargo fix
+          git diff --exit-code
+      - name: cargo fix edition
+        run: |
+          cargo fix --edition
+          git diff --exit-code
+
+  clippy:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Install Rust ${{ inputs.rust-version }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ inputs.rust-version }}
+          components: clippy
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ inputs.rust-version }}
+      - name: install deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
+      - name: cargo clippy
+        run: cargo clippy
+
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Install Rust ${{ inputs.rust-version }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ inputs.rust-version }}
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ inputs.rust-version }}
+      - name: install deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
+      - name: Build
+        run: cargo build
+
+  test:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Install Rust ${{ inputs.rust-version }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ inputs.rust-version }}
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ inputs.rust-version }}
+      - name: install deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
+      - name: Run tests
+        run: cargo test
+
+  bench:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Install Rust ${{ inputs.rust-version }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ inputs.rust-version }}
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ inputs.rust-version }}
+      - name: install deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
+      - name: Run benchs
+        run: cargo bench
