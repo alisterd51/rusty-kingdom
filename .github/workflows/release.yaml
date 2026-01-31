@@ -29,6 +29,9 @@ jobs:
 
   container-build:
     uses: ./.github/workflows/container-ci.yaml
+    permissions:
+      contents: read
+      packages: write
     with:
       tag: ${{ github.ref_name }}
     secrets: inherit
