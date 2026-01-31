@@ -133,12 +133,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create and push manifest
         run: |
-          IMAGES=""
+          IMAGES=()
           IFS=' ' read -r -a ARCH_ARRAY <<< "$ARCHITECTURES"
           for arch in "${ARCH_ARRAY[@]}"; do
-            IMAGES="$IMAGES ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly-$arch"
+            IMAGES+=("ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly-$arch")
           done
-          docker manifest create ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly $IMAGES
+          docker manifest create ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly "${IMAGES[@]}"
           docker manifest push ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly
-          docker manifest create ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest $IMAGES
+          docker manifest create ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest "${IMAGES[@]}"
           docker manifest push ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest
