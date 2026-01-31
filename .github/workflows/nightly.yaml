@@ -134,7 +134,8 @@ jobs:
       - name: Create and push manifest
         run: |
           IMAGES=""
-          for arch in $ARCHITECTURES; do
+          IFS=' ' read -r -a ARCH_ARRAY <<< "$ARCHITECTURES"
+          for arch in "${ARCH_ARRAY[@]}"; do
             IMAGES="$IMAGES ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly-$arch"
           done
           docker manifest create ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly $IMAGES
