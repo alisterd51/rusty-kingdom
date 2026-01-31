@@ -6,38 +6,18 @@ on:
   pull_request:
     branches: [ "master" ]
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - name: install deps
-        run: |
-          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
-      - name: Format
-        run: cargo fmt --check
-      - name: cargo fix
-        run: |
-          cargo fix
-          git diff --exit-code
-      - name: cargo fix edition
-        run: |
-          cargo fix --edition
-          git diff --exit-code
-      - name: cargo clippy
-        run: |
-          cargo clippy
-      - name: cargo clippy --release
-        run: |
-          cargo clippy --release
-      - name: Build
-        run: |
-          cargo build
-          cargo build --release
-      - name: Run tests
-        run: cargo test
-      - name: Run benchs
-        run: cargo bench
+  stable:
+    uses: ./.github/workflows/rust-ci.yaml
+    with:
+      rust-version: stable
+
+  beta:
+    uses: ./.github/workflows/rust-ci.yaml
+    with:
+      rust-version: beta
+
+  nightly:
+    uses: ./.github/workflows/rust-ci.yaml
+    with:
+      rust-version: nightly
