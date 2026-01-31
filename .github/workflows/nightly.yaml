@@ -5,9 +5,6 @@ on:
   schedule:
     - cron: '42 23 * * *'
 
-env:
-  ARCHITECTURES: amd64 arm64
-
 jobs:
   prerelease:
     permissions: write-all
@@ -52,81 +49,7 @@ jobs:
           tag_name: nightly
 
   container-build:
-    strategy:
-      matrix:
-        container:
-          - crud-server
-          - game-server
-          - game-frontend
-          - migration
-        arch:
-          - amd64
-          - arm64
-        include:
-          - arch: amd64
-            runner: ubuntu-24.04
-          - arch: arm64
-            runner: ubuntu-24.04-arm64
-    runs-on: ${{ matrix.runner }}
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to dhi.io
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-        with:
-          registry: dhi.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push ${{ matrix.container }} (${{ matrix.arch }})
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
-        with:
-          context: .
-          file: Containerfile
-          target: runtime-${{ matrix.container }}
-          platforms: linux/${{ matrix.arch }}
-          push: true
-          tags: |
-            ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly-${{ matrix.arch }}
-
-  container-manifest:
-    needs: container-build
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        container:
-          - crud-server
-          - game-server
-          - game-frontend
-          - migration
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create and push manifest
-        run: |
-          IMAGES=()
-          IFS=' ' read -r -a ARCH_ARRAY <<< "$ARCHITECTURES"
-          for arch in "${ARCH_ARRAY[@]}"; do
-            IMAGES+=("ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly-$arch")
-          done
-          docker manifest create ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly "${IMAGES[@]}"
-          docker manifest push ghcr.io/alisterd51/rusty-${{ matrix.container }}:nightly
-          docker manifest create ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest "${IMAGES[@]}"
-          docker manifest push ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest
+    uses: ./.github/workflows/container-ci.yaml
+    with:
+      tag: nightly
+    secrets: inherit
