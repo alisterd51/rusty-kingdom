@@ -74,6 +74,8 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Login to GitHub Container Registry
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
@@ -87,7 +89,5 @@ jobs:
           for arch in "${ARCH_ARRAY[@]}"; do
             IMAGES+=("ghcr.io/alisterd51/rusty-${{ matrix.container }}:${{ inputs.tag }}-$arch")
           done
-          docker manifest create ghcr.io/alisterd51/rusty-${{ matrix.container }}:${{ inputs.tag }} "${IMAGES[@]}"
-          docker manifest push ghcr.io/alisterd51/rusty-${{ matrix.container }}:${{ inputs.tag }}
-          docker manifest create ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest "${IMAGES[@]}"
-          docker manifest push ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest
+          docker buildx imagetools create -t ghcr.io/alisterd51/rusty-${{ matrix.container }}:${{ inputs.tag }} "${IMAGES[@]}"
+          docker buildx imagetools create -t ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest "${IMAGES[@]}"
