@@ -13,17 +13,22 @@ jobs:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - name: install deps
         run: |
-          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev
-      - name: Build BIN
+          sudo apt-get update && sudo apt-get install -y protobuf-compiler libprotobuf-dev musl-tools
+      - name: Install musl target
+        run: rustup target add x86_64-unknown-linux-musl
+      - name: Build clients
         run: |
-          cargo build --release
+          cargo build --release --target x86_64-unknown-linux-musl -p crud-client -p game-client
+      - name: Build servers
+        run: |
+          cargo build --release -p crud-server -p game-server -p migration
       - name: Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
           files: |
-            target/release/crud-client
+            target/x86_64-unknown-linux-musl/release/crud-client
+            target/x86_64-unknown-linux-musl/release/game-client
             target/release/crud-server
-            target/release/game-client
             target/release/game-server
             target/release/migration
 
