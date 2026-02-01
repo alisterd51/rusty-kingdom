@@ -8,8 +8,7 @@ on:
         type: string
 
 env:
-  ARCHITECTURES: amd64
-  # ARCHITECTURES: amd64 arm64
+  ARCHITECTURES: amd64 arm64
 
 jobs:
   container-build:
@@ -22,12 +21,12 @@ jobs:
           - migration
         arch:
           - amd64
-          # - arm64
+          - arm64
         include:
           - arch: amd64
             runner: ubuntu-24.04
-          # - arch: arm64
-          #   runner: ubuntu-24.04-arm64
+          - arch: arm64
+            runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
