@@ -25,6 +25,7 @@ use service::{MyBuildingService, MyFortressService};
 use std::sync::Arc;
 use tokio::signal::unix::{SignalKind, signal};
 use tonic::transport::Server;
+use tracing::{error, info, warn};
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
@@ -35,18 +36,19 @@ async fn shutdown_signal() {
     match (sigterm, sigint) {
         (Ok(mut term), Ok(mut int)) => {
             tokio::select! {
-                _ = term.recv() => println!("SIGTERM received"),
-                _ = int.recv() => println!("SIGINT received"),
+                _ = term.recv() => warn!("SIGTERM received"),
+                _ = int.recv() => warn!("SIGINT received"),
             };
         }
         (Err(e), _) | (_, Err(e)) => {
-            eprintln!("Failed to setup signal handler: {e}");
+            error!("Failed to setup signal handler: {e}");
         }
     }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt::init();
     let addr = "[::]:3000".parse()?;
     let database_url = std::env::var("DATABASE_URL").map_err(|e| format!("DATABASE_URL {e}"))?;
     let manager = ConnectionManager::<PgConnection>::new(database_url);
@@ -55,7 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let building_service = MyBuildingService::new(pool.clone());
     let fortress_service = MyFortressService::new(pool);
 
-    println!("Listening on {addr}");
+    info!("Listening on {addr}");
 
     Server::builder()
         .add_service(BuildingServiceServer::new(building_service))
