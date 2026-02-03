@@ -17,6 +17,7 @@ use tokio::signal::unix::{SignalKind, signal};
 use tonic::transport::Server;
 use tonic_web::GrpcWebLayer;
 use tower_http::cors::CorsLayer;
+use tracing::{error, info, warn};
 
 #[allow(clippy::pedantic, clippy::nursery)]
 pub mod pb {
@@ -44,18 +45,19 @@ async fn shutdown_signal() {
     match (sigterm, sigint) {
         (Ok(mut term), Ok(mut int)) => {
             tokio::select! {
-                _ = term.recv() => println!("SIGTERM received"),
-                _ = int.recv() => println!("SIGINT received"),
+                _ = term.recv() => warn!("SIGTERM received"),
+                _ = int.recv() => warn!("SIGINT received"),
             };
         }
         (Err(e), _) | (_, Err(e)) => {
-            eprintln!("Failed to setup signal handler: {e}");
+            error!("Failed to setup signal handler: {e}");
         }
     }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt::init();
     let addr = "[::]:3000".parse()?;
     let crud_server_url =
         std::env::var("CRUD_SERVER_URL").map_err(|e| format!("CRUD_SERVER_URL {e}"))?;
@@ -64,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let building_service = MyBuildingService::new(crud_building_client.clone());
     let fortress_service = MyFortressService::new(crud_building_client, crud_fortress_client);
 
-    println!("Listening on {addr}");
+    info!("Listening on {addr}");
 
     Server::builder()
         .accept_http1(true)

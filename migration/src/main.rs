@@ -1,5 +1,6 @@
 use diesel::{Connection, PgConnection};
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
+use tracing::info;
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("../rusty/migrations/");
 
@@ -11,11 +12,12 @@ fn establish_connection() -> Result<PgConnection, Box<dyn std::error::Error>> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt::init();
     let conn = &mut establish_connection()?;
 
     conn.run_pending_migrations(MIGRATIONS)
         .map_err(|e| format!("Migration failed: {e}"))?;
-    println!("Migrations applied successfully");
+    info!("Migrations applied successfully");
 
     Ok(())
 }
