@@ -1,5 +1,7 @@
 # Rusty Kingdom
 
+[![Nightly](https://github.com/alisterd51/rusty-kingdom/actions/workflows/nightly.yaml/badge.svg)](https://github.com/alisterd51/rusty-kingdom/actions/workflows/nightly.yaml)
+
 Rusty Kingdom est un jeu de gestion avec quelques subtilités :
 
 - il a été conçu pour être un [jeu incrémental](https://en.wikipedia.org/wiki/Incremental_game) mais pourrait évoluer vers d'autres genres de jeux.
