@@ -19,7 +19,7 @@ WORKDIR /game-frontend
 ARG GAME_API_URL="https://rusty.anclarma.fr"
 RUN trunk build --frozen --release --minify
 
-FROM dhi.io/debian-base:trixie AS runtime-common-libpq-libssl
+FROM dhi.io/debian-base:trixie-dev AS runtime-common-libpq-libssl
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     libssl3 \
