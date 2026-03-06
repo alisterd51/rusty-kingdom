@@ -506,6 +506,7 @@ mod tests {
         }
     }
 
+    #[allow(clippy::cast_possible_truncation)]
     #[test]
     fn test_upgrade_cost() {
         const FACTOR: f64 = 1.1012;
@@ -524,13 +525,14 @@ mod tests {
         let result = upgrade_cost(50, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 1125);
         let result = upgrade_cost(100, BASE_COST, FACTOR) as i32;
-        assert_eq!(result, 139557);
+        assert_eq!(result, 139_557);
         let result = upgrade_cost(150, BASE_COST, FACTOR) as i32;
-        assert_eq!(result, 17300721);
+        assert_eq!(result, 17_300_721);
         let result = upgrade_cost(200, BASE_COST, FACTOR) as i32;
-        assert_eq!(result, 2144738468);
+        assert_eq!(result, 2_144_738_468);
     }
 
+    #[allow(clippy::cast_possible_truncation)]
     #[test]
     fn test_upgrade_cost_overflow() {
         const FACTOR: f64 = 1.1012;
@@ -542,6 +544,7 @@ mod tests {
         assert_eq!(result, i32::MAX);
     }
 
+    #[allow(clippy::cast_possible_truncation)]
     #[test]
     fn test_level_slice() {
         let cost_max = i32::MAX;
