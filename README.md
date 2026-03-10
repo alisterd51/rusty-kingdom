@@ -178,6 +178,8 @@ http:
     game-frontend:
       rule: "Host(`rusty.anclarma.fr`)"
       service: game-frontend-service
+      middlewares:
+        - compress
       entryPoints:
         - websecure
       tls:
@@ -189,6 +191,10 @@ http:
         - websecure
       tls:
         certresolver: myresolver
+
+  middlewares:
+    compress:
+      compress: {}
 
   services:
     game-frontend-service:
