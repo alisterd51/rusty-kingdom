@@ -55,4 +55,7 @@ panic = "immediate-abort"
 codegen-units = 1
 lto = true
 strip = true
-opt-level = "s"
+opt-level = "z"
+
+[profile.bench]
+panic = "unwind"
