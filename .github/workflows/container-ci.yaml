@@ -13,6 +13,7 @@ env:
 jobs:
   container-build:
     strategy:
+      fail-fast: false
       matrix:
         container:
           - crud-server
@@ -63,6 +64,7 @@ jobs:
     needs: container-build
     runs-on: ubuntu-24.04
     strategy:
+      fail-fast: false
       matrix:
         container:
           - crud-server
