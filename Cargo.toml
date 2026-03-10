@@ -79,11 +79,15 @@ unwrap_in_result = "deny"
 panic_in_result_fn = "deny"
 
 [profile.release]
-panic = "immediate-abort"
+panic = "abort"
 codegen-units = 1
 lto = true
 strip = true
 
 [profile.wasm-release]
 inherits = "release"
+panic = "immediate-abort"
 opt-level = "z"
+
+[profile.bench]
+panic = "unwind"
