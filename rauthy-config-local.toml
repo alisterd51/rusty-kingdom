@@ -1,0 +1,15 @@
+[cluster]
+node_id = 1
+
+[server]
+port_http = 8082
+scheme = 'http'
+pub_url = 'localhost:8082'
+proxy_mode = false
+
+[webauthn]
+rp_id = 'localhost'
+rp_origin = 'http://localhost:8082'
+
+[mfa]
+admin_force_mfa = false

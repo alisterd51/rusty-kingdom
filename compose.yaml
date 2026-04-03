@@ -47,20 +47,61 @@ services:
     restart: on-failure
     environment:
       CRUD_SERVER_URL: "http://crud_server:3000"
+      AUTH_URL: "http://rauthy:8082"
+      ISSUER_URL: "http://localhost:8082"
     ports:
       - "127.0.0.1:8080:3000"
     networks:
       - rusty-network
+      - rauthy-network
   game_frontend:
     build:
       context: .
       dockerfile: Containerfile
       target: runtime-game-frontend
       args:
-        GAME_API_URL: "http://127.0.0.1:8080"
+        BACKEND_URL: "http://localhost:8080"
+        FRONTEND_URL: "http://localhost:8081"
+        AUTH_URL: "http://localhost:8082"
     ports:
       - "127.0.0.1:8081:80"
+  rauthy:
+    image: ghcr.io/sebadob/rauthy:0.35.0
+    environment:
+      ENC_KEYS: ${ENC_KEYS}
+      ENC_KEY_ACTIVE: ${ENC_KEY_ACTIVE}
+      HQL_SECRET_RAFT: ${HQL_SECRET_RAFT}
+      HQL_SECRET_API: ${HQL_SECRET_API}
+      BOOTSTRAP_API_KEY: ${BOOTSTRAP_API_KEY}
+      BOOTSTRAP_API_KEY_SECRET: ${BOOTSTRAP_API_KEY_SECRET}
+    volumes:
+      - rauthy-data:/app/data:rw
+      - ./rauthy-config-local.toml:/app/config.toml:ro
+    ports:
+      - "127.0.0.1:8082:8082"
+    networks:
+      - rauthy-network
+  rauthy-init:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: runtime-rauthy-init
+    restart: on-failure
+    environment:
+      RAUTHY_URL: "http://rauthy:8082"
+      BOOTSTRAP_API_KEY_NAME: "bootstrap"
+      BOOTSTRAP_API_KEY_SECRET: ${BOOTSTRAP_API_KEY_SECRET}
+      CLIENT_ID: "rusty-client"
+      CLIENT_NAME: "Rusty Client"
+      PUBLIC_URL: "http://localhost:8081"
+    networks:
+      - rauthy-network
+
+volumes:
+  rauthy-data:
 
 networks:
   rusty-network:
+    external: false
+  rauthy-network:
     external: false

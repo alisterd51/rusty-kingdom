@@ -20,6 +20,7 @@ jobs:
           - game-server
           - game-frontend
           - migration
+          - rauthy-init
         arch:
           - amd64
           - arm64
@@ -71,6 +72,7 @@ jobs:
           - game-server
           - game-frontend
           - migration
+          - rauthy-init
     permissions:
       contents: read
       packages: write
@@ -84,11 +86,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create and push manifest
+        env:
+          CONTAINER_NAME: ${{ matrix.container }}
+          IMAGE_TAG: ${{ inputs.tag }}
         run: |
           IMAGES=()
           IFS=' ' read -r -a ARCH_ARRAY <<< "$ARCHITECTURES"
           for arch in "${ARCH_ARRAY[@]}"; do
-            IMAGES+=("ghcr.io/alisterd51/rusty-${{ matrix.container }}:${{ inputs.tag }}-$arch")
+            IMAGES+=("ghcr.io/alisterd51/rusty-${CONTAINER_NAME}:${IMAGE_TAG}-$arch")
           done
-          docker buildx imagetools create -t ghcr.io/alisterd51/rusty-${{ matrix.container }}:${{ inputs.tag }} "${IMAGES[@]}"
-          docker buildx imagetools create -t ghcr.io/alisterd51/rusty-${{ matrix.container }}:latest "${IMAGES[@]}"
+          docker buildx imagetools create -t ghcr.io/alisterd51/rusty-${CONTAINER_NAME}:${IMAGE_TAG} "${IMAGES[@]}"
+          docker buildx imagetools create -t ghcr.io/alisterd51/rusty-${CONTAINER_NAME}:latest "${IMAGES[@]}"

@@ -1,9 +1,7 @@
 use crate::{
-    app::{ResourceView, get_client, use_id_param},
+    app::{ResourceView, get_building_client, get_token, use_id_param},
     i18n::{t, use_i18n},
-    pb::game::v1::{
-        ListBuildingsByFortressRequest, building_service_client::BuildingServiceClient,
-    },
+    pb::game::v1::ListBuildingsByFortressRequest,
 };
 use leptos::prelude::*;
 use leptos_router::components::A;
@@ -13,12 +11,13 @@ pub fn FortressBuildingList() -> impl IntoView {
     let i18n = use_i18n();
     let id_signal = use_id_param();
     let buildings_resource = LocalResource::new(move || {
+        let token = get_token();
         let fortress_id = id_signal();
         async move {
             let Some(fortress_id) = fortress_id else {
                 return Err("Invalid Fortress ID".to_string());
             };
-            let mut service = BuildingServiceClient::new(get_client());
+            let mut service = get_building_client(token);
             let request = tonic::Request::new(ListBuildingsByFortressRequest { fortress_id });
             service
                 .list_buildings_by_fortress(request)

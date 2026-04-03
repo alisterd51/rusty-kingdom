@@ -5,6 +5,7 @@ use diesel::prelude::*;
 #[diesel(table_name = fortresses)]
 pub struct Fortress {
     pub id: i32,
+    pub owner_id: String,
     pub gold: i32,
     pub food: i32,
     pub wood: i32,
@@ -14,6 +15,7 @@ pub struct Fortress {
 #[derive(Insertable)]
 #[diesel(table_name = fortresses)]
 pub struct NewFortress {
+    pub owner_id: String,
     pub gold: i32,
     pub food: i32,
     pub wood: i32,

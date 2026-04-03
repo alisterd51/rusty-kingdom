@@ -1,5 +1,8 @@
 lang = "🇫🇷"
 home = "Accueil"
+login = "Connexion"
+connected = "Connecté"
+logout = "Déconnexion"
 fortresses = "Forteresses"
 buildings = "Bâtiments"
 github = "GitHub"

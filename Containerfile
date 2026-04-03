@@ -1,7 +1,10 @@
 FROM rust:trixie AS build-common
-RUN apt-get update && apt-get install -y libpq-dev libssl-dev protobuf-compiler libprotobuf-dev wget
+RUN apt-get update && apt-get install -y libpq-dev libssl-dev protobuf-compiler libprotobuf-dev wget clang
 COPY . .
 RUN cargo fetch --locked
+
+FROM build-common AS build-rauthy-init
+RUN cargo build --frozen --release --bin=rauthy-init
 
 FROM build-common AS build-migration
 RUN cargo build --frozen --release --bin=migration
@@ -16,7 +19,9 @@ FROM build-common AS build-game-frontend
 RUN rustup target add wasm32-unknown-unknown
 RUN wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.22.0-beta.1/trunk-$(uname -m)-unknown-linux-gnu.tar.gz | tar -xzf- -C /usr/local/bin
 WORKDIR /game-frontend
-ARG GAME_API_URL="https://rusty.anclarma.fr"
+ARG BACKEND_URL="https://rusty.anclarma.fr"
+ARG FRONTEND_URL="https://rusty.anclarma.fr"
+ARG AUTH_URL="https://auth.rusty.anclarma.fr"
 RUN trunk build --frozen --release --minify
 
 FROM dhi.io/debian-base:trixie-dev AS runtime-common-libpq-libssl
@@ -29,6 +34,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 FROM runtime-common-libpq-libssl AS runtime-migration
 COPY --from=build-migration /target/release/migration /migration
 CMD [ "/migration" ]
+
+FROM runtime-common-libpq-libssl AS runtime-rauthy-init
+COPY --from=build-rauthy-init /target/release/rauthy-init /rauthy-init
+CMD [ "/rauthy-init" ]
 
 FROM runtime-common-libpq-libssl AS runtime-crud-server
 COPY --from=build-crud-server /target/release/crud-server /crud-server

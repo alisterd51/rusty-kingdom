@@ -49,6 +49,7 @@ jobs:
             target/release/crud-server
             target/release/game-server
             target/release/migration
+            target/release/rauthy-init
           prerelease: true
           name: nightly
           tag_name: nightly

@@ -12,6 +12,7 @@ diesel::table! {
 diesel::table! {
     fortresses (id) {
         id -> Int4,
+        owner_id -> Varchar,
         gold -> Int4,
         food -> Int4,
         wood -> Int4,

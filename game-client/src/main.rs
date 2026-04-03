@@ -12,8 +12,8 @@ pub mod pb {
     }
 }
 
-use clap::{Command, CommandFactory, Parser, Subcommand};
-use clap_complete::{Generator, Shell, generate};
+use clap::{CommandFactory, Parser, Subcommand};
+use clap_complete::{Shell, generate};
 use pb::game::v1::{
     CollectFortressEnergyRequest, CollectFortressFoodRequest, CollectFortressGoldRequest,
     CollectFortressWoodRequest, CreateFortressRequest, DeleteFortressRequest, GetBuildingRequest,
@@ -23,8 +23,13 @@ use pb::game::v1::{
     building_service_client::BuildingServiceClient, fortress_service_client::FortressServiceClient,
 };
 use serde_json::json;
-use std::io;
-use tonic::transport::Channel;
+use std::{fs, io, time::Duration};
+use tonic::{
+    Status,
+    metadata::MetadataValue,
+    service::{Interceptor, interceptor::InterceptedService},
+    transport::{Channel, ClientTlsConfig},
+};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -39,10 +44,21 @@ struct Args {
         default_value = "https://rusty.anclarma.fr"
     )]
     url: String,
+
+    #[arg(
+        long,
+        value_name = "AUTH_URL",
+        default_value = "https://auth.rusty.anclarma.fr"
+    )]
+    auth_url: String,
+
+    #[arg(long, help = "Disable authentication (Guest Mode)")]
+    no_auth: bool,
 }
 
 #[derive(Subcommand, Clone)]
 enum Commands {
+    Login,
     Fortress {
         #[command(subcommand)]
         cmd: FortressCommands,
@@ -84,13 +100,30 @@ enum FortressCommands {
     GetAllBuildings { fortress_id: i32 },
 }
 
-fn print_completions<G: Generator>(generator: G, cmd: &mut Command) {
-    generate(generator, cmd, cmd.get_name().to_owned(), &mut io::stdout());
+#[derive(Clone)]
+struct AuthInterceptor {
+    token: String,
+}
+
+impl Interceptor for AuthInterceptor {
+    fn call(&mut self, mut request: tonic::Request<()>) -> Result<tonic::Request<()>, Status> {
+        if self.token.is_empty() {
+            return Ok(request);
+        }
+        let bearer = format!("Bearer {}", self.token);
+        MetadataValue::try_from(&bearer).map_or_else(
+            |_| Err(Status::unauthenticated("Invalid access token")),
+            |meta| {
+                request.metadata_mut().insert("authorization", meta);
+                Ok(request)
+            },
+        )
+    }
 }
 
 async fn handle_fortress(
-    fortress_client: &mut FortressServiceClient<Channel>,
-    building_client: &mut BuildingServiceClient<Channel>,
+    fortress_client: &mut FortressServiceClient<InterceptedService<Channel, AuthInterceptor>>,
+    building_client: &mut BuildingServiceClient<InterceptedService<Channel, AuthInterceptor>>,
     cmd: FortressCommands,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match cmd {
@@ -194,7 +227,7 @@ async fn handle_fortress(
 }
 
 async fn handle_building(
-    building_client: &mut BuildingServiceClient<Channel>,
+    building_client: &mut BuildingServiceClient<InterceptedService<Channel, AuthInterceptor>>,
     cmd: BuildingCommands,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match cmd {
@@ -234,7 +267,7 @@ async fn handle_building(
 }
 
 async fn handle_bench(
-    fortress_client: &mut FortressServiceClient<Channel>,
+    fortress_client: &mut FortressServiceClient<InterceptedService<Channel, AuthInterceptor>>,
     size: usize,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let fortress = fortress_client
@@ -258,32 +291,136 @@ async fn handle_bench(
     Ok(())
 }
 
+async fn handle_login(auth_url: &str, client_id: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let client = reqwest::Client::new();
+    let device_auth_url = format!("{auth_url}/auth/v1/oidc/device");
+    let token_url = format!("{auth_url}/auth/v1/oidc/token");
+
+    println!("Initializing the connection...");
+
+    let auth_payload = format!("client_id={client_id}&scope=openid%20profile%20email");
+
+    let res = client
+        .post(&device_auth_url)
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body(auth_payload)
+        .send()
+        .await?;
+
+    if !res.status().is_success() {
+        let status = res.status();
+        let error_body = res.text().await.unwrap_or_default();
+        return Err(format!("Erreur API Rauthy ({status}) : {error_body}").into());
+    }
+
+    let res_json = res.json::<serde_json::Value>().await?;
+
+    let device_code = res_json["device_code"].as_str().ok_or("No device_code")?;
+    let user_code = res_json["user_code"].as_str().ok_or("No user_code")?;
+    let verification_uri = res_json["verification_uri_complete"]
+        .as_str()
+        .or_else(|| res_json["verification_uri"].as_str())
+        .ok_or("No verification_uri")?;
+    let interval = res_json["interval"].as_u64().unwrap_or(5);
+
+    println!("====================================================");
+    println!("Please open this URL in your browser :");
+    println!("{verification_uri}");
+    println!("Verify that the code matches : {user_code}");
+    println!("Waiting for your validation... (do not close this terminal)");
+    println!("====================================================");
+
+    loop {
+        tokio::time::sleep(Duration::from_secs(interval)).await;
+
+        let token_payload = format!(
+            "grant_type=urn:ietf:params:oauth:grant-type:device_code&client_id={client_id}&device_code={device_code}"
+        );
+
+        let token_res = client
+            .post(&token_url)
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(token_payload)
+            .send()
+            .await?;
+
+        if token_res.status().is_success() {
+            let token_json: serde_json::Value = token_res.json().await?;
+
+            fs::write(
+                ".rusty_token",
+                token_json["access_token"]
+                    .as_str()
+                    .ok_or("No access_token")?,
+            )?;
+            fs::write(".bot_token", serde_json::to_string_pretty(&token_json)?)?;
+
+            println!("Connection successful! CLI and Bot tokens saved locally.");
+            break;
+        }
+        let err = token_res.json::<serde_json::Value>().await?;
+        let error_code = err["error"].as_str().unwrap_or("");
+        if error_code != "authorization_pending" && error_code != "slow_down" {
+            return Err(format!("Authentication failed: {error_code}").into());
+        }
+    }
+
+    Ok(())
+}
+
+// TODO: Should we use `keyring` instead?
+fn get_local_token() -> Result<String, Box<dyn std::error::Error>> {
+    fs::read_to_string(".rusty_token")
+        .map_err(|_| "Not logged in. Please launch 'game-client login' first.".into())
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
     match args.cmd {
-        Commands::Fortress { cmd } => {
-            let mut game_building_client = BuildingServiceClient::connect(args.url.clone()).await?;
-            let mut game_fortress_client = FortressServiceClient::connect(args.url).await?;
-
-            handle_fortress(&mut game_fortress_client, &mut game_building_client, cmd).await?;
-        }
-        Commands::Building { cmd } => {
-            let mut game_building_client = BuildingServiceClient::connect(args.url).await?;
-
-            handle_building(&mut game_building_client, cmd).await?;
-        }
-        Commands::Bench { size } => {
-            let mut game_fortress_client = FortressServiceClient::connect(args.url).await?;
-
-            handle_bench(&mut game_fortress_client, size).await?;
+        Commands::Login => {
+            handle_login(&args.auth_url, "rusty-client").await?;
+            return Ok(());
         }
         Commands::Completions { shell } => {
             let mut cmd = Args::command();
-
-            print_completions(shell, &mut cmd);
+            generate(shell, &mut cmd, "game-client", &mut io::stdout());
+            return Ok(());
         }
+        _ => {}
+    }
+
+    let token = if args.no_auth {
+        String::new()
+    } else {
+        get_local_token()?
+    };
+    let interceptor = AuthInterceptor { token };
+    let mut endpoint = Channel::from_shared(args.url.clone())?;
+
+    if args.url.starts_with("https://") {
+        let tls = ClientTlsConfig::new().with_native_roots();
+        endpoint = endpoint.tls_config(tls)?;
+    }
+
+    let channel = endpoint.connect().await?;
+
+    let mut game_building_client =
+        BuildingServiceClient::with_interceptor(channel.clone(), interceptor.clone());
+    let mut game_fortress_client = FortressServiceClient::with_interceptor(channel, interceptor);
+
+    match args.cmd {
+        Commands::Fortress { cmd } => {
+            handle_fortress(&mut game_fortress_client, &mut game_building_client, cmd).await?;
+        }
+        Commands::Building { cmd } => {
+            handle_building(&mut game_building_client, cmd).await?;
+        }
+        Commands::Bench { size } => {
+            handle_bench(&mut game_fortress_client, size).await?;
+        }
+        _ => unreachable!(),
     }
     Ok(())
 }

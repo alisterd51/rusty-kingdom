@@ -1,10 +1,9 @@
 use crate::{
-    app::{ResourceView, get_client, use_id_param},
+    app::{ResourceView, get_fortress_client, get_token, use_id_param},
     i18n::{t, use_i18n},
     pb::game::v1::{
         CollectFortressEnergyRequest, CollectFortressFoodRequest, CollectFortressGoldRequest,
         CollectFortressWoodRequest, GetFortressRequest,
-        fortress_service_client::FortressServiceClient,
     },
 };
 use leptos::prelude::*;
@@ -15,9 +14,12 @@ macro_rules! make_collect_action {
         Action::new_local(move |id: &i32| {
             let id = *id;
             let trigger = $trigger;
+            let token = get_token();
+
             async move {
-                let mut client = FortressServiceClient::new(get_client());
+                let mut client = get_fortress_client(token);
                 let request = tonic::Request::new($req_type { id });
+
                 match client.$method(request).await {
                     Ok(_) => trigger.update(|n| *n += 1),
                     Err(e) => leptos::logging::error!("Collect failed: {}", e),
@@ -36,21 +38,23 @@ pub fn FortressDetail() -> impl IntoView {
     let fortress_resource = LocalResource::new(move || {
         let id = id_signal();
         refresh_trigger.get();
+        let token = get_token();
+
         async move {
             let Some(id) = id else { return Ok(None) };
-            let mut service = FortressServiceClient::new(get_client());
+
+            let mut client = get_fortress_client(token);
             let request = tonic::Request::new(GetFortressRequest { id });
 
-            match service.get_fortress(request).await {
-                Ok(resp) => Ok(resp.into_inner().fortress),
+            match client.get_fortress(request).await {
+                Ok(resp) => resp.into_inner().fortress.map_or(Ok(None), |f| Ok(Some(f))),
                 Err(status) => {
                     if status.code() == tonic::Code::NotFound
                         || status.message().contains("not found")
                     {
-                        Ok(None)
-                    } else {
-                        Err(status.to_string())
+                        return Ok(None);
                     }
+                    Err(status.message().to_string())
                 }
             }
         }
