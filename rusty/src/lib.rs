@@ -11,16 +11,11 @@ pub struct Costs {
     pub energy: i32,
 }
 
-impl Default for NewFortress {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl NewFortress {
     #[must_use]
-    pub const fn new() -> Self {
+    pub const fn new(owner_id: String) -> Self {
         Self {
+            owner_id,
             gold: 0,
             food: 0,
             wood: 0,

@@ -1,5 +1,7 @@
 /target
 .env
+.bot_token
+.rusty_token
 
 # leptos dist files
 dist

@@ -1,10 +1,7 @@
 use crate::{
-    app::{ResourceView, get_client},
+    app::{ResourceView, get_fortress_client, get_token},
     i18n::{t, use_i18n},
-    pb::game::v1::{
-        CreateFortressRequest, DeleteFortressRequest, ListFortressesRequest,
-        fortress_service_client::FortressServiceClient,
-    },
+    pb::game::v1::{CreateFortressRequest, DeleteFortressRequest, ListFortressesRequest},
 };
 use leptos::prelude::*;
 use leptos_router::components::A;
@@ -15,8 +12,10 @@ pub fn FortressList() -> impl IntoView {
     let (refresh_trigger, set_refresh_trigger) = signal(0);
     let fortresses_resource = LocalResource::new(move || {
         refresh_trigger.get();
+        let token = get_token();
+
         async move {
-            let mut fortress_client = FortressServiceClient::new(get_client());
+            let mut fortress_client = get_fortress_client(token);
             let request = tonic::Request::new(ListFortressesRequest {});
             let response = fortress_client.list_fortresses(request).await;
             response
@@ -24,20 +23,26 @@ pub fn FortressList() -> impl IntoView {
                 .map_err(|e| e.to_string())
         }
     });
-    let create_action = Action::new_local(move |()| async move {
-        let mut client = FortressServiceClient::new(get_client());
-        let request = tonic::Request::new(CreateFortressRequest {});
-        match client.create_fortress(request).await {
-            Ok(_) => {
-                set_refresh_trigger.update(|n| *n += 1);
+    let create_action = Action::new_local(move |()| {
+        let token = get_token();
+
+        async move {
+            let mut client = get_fortress_client(token);
+            let request = tonic::Request::new(CreateFortressRequest {});
+            match client.create_fortress(request).await {
+                Ok(_) => {
+                    set_refresh_trigger.update(|n| *n += 1);
+                }
+                Err(e) => leptos::logging::error!("Failed to create fortress: {}", e),
             }
-            Err(e) => leptos::logging::error!("Failed to create fortress: {}", e),
         }
     });
     let delete_action = Action::new_local(move |id: &i32| {
         let id = *id;
+        let token = get_token();
+
         async move {
-            let mut client = FortressServiceClient::new(get_client());
+            let mut client = get_fortress_client(token);
             let request = tonic::Request::new(DeleteFortressRequest { id });
             match client.delete_fortress(request).await {
                 Ok(_) => set_refresh_trigger.update(|n| *n += 1),

@@ -58,6 +58,7 @@ impl From<Fortress> for crate::pb::common::v1::Fortress {
     fn from(value: Fortress) -> Self {
         Self {
             id: value.id,
+            owner_id: value.owner_id,
             gold: value.gold,
             food: value.food,
             wood: value.wood,
@@ -69,6 +70,7 @@ impl From<Fortress> for crate::pb::common::v1::Fortress {
 impl From<crate::pb::common::v1::NewFortress> for NewFortress {
     fn from(value: crate::pb::common::v1::NewFortress) -> Self {
         Self {
+            owner_id: value.owner_id,
             gold: value.gold,
             food: value.food,
             wood: value.wood,
@@ -92,6 +94,8 @@ impl From<crate::pb::common::v1::UpdateFortress> for UpdateFortress {
 struct FortressRow {
     #[diesel(sql_type = Integer)]
     id: i32,
+    #[diesel(sql_type = Text)]
+    owner_id: String,
     #[diesel(sql_type = Integer)]
     gold: i32,
     #[diesel(sql_type = Integer)]
@@ -103,13 +107,14 @@ struct FortressRow {
 }
 
 impl From<FortressRow> for crate::pb::common::v1::Fortress {
-    fn from(v: FortressRow) -> Self {
+    fn from(value: FortressRow) -> Self {
         Self {
-            id: v.id,
-            gold: v.gold,
-            food: v.food,
-            wood: v.wood,
-            energy: v.energy,
+            id: value.id,
+            owner_id: value.owner_id,
+            gold: value.gold,
+            food: value.food,
+            wood: value.wood,
+            energy: value.energy,
         }
     }
 }
@@ -518,7 +523,7 @@ impl FortressService for MyFortressService {
                                 FROM buildings
                                 WHERE fortress_id = $1 AND name = $3), 0)
                 WHERE id = $1
-                RETURNING id, gold, food, wood, energy
+                RETURNING id, owner_id, gold, food, wood, energy
             "
             }
             ResourceKind::Food => {
@@ -529,7 +534,7 @@ impl FortressService for MyFortressService {
                                 FROM buildings
                                 WHERE fortress_id = $1 AND name = $3), 0)
                 WHERE id = $1
-                RETURNING id, gold, food, wood, energy
+                RETURNING id, owner_id, gold, food, wood, energy
             "
             }
             ResourceKind::Wood => {
@@ -540,7 +545,7 @@ impl FortressService for MyFortressService {
                                 FROM buildings
                                 WHERE fortress_id = $1 AND name = $3), 0)
                 WHERE id = $1
-                RETURNING id, gold, food, wood, energy
+                RETURNING id, owner_id, gold, food, wood, energy
             "
             }
             ResourceKind::Energy => {
@@ -551,7 +556,7 @@ impl FortressService for MyFortressService {
                                 FROM buildings
                                 WHERE fortress_id = $1 AND name = $3), 0)
                 WHERE id = $1
-                RETURNING id, gold, food, wood, energy
+                RETURNING id, owner_id, gold, food, wood, energy
             "
             }
             ResourceKind::Unspecified => {

@@ -12,6 +12,7 @@ clap_complete.workspace = true
 tokio.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+reqwest.workspace = true
 
 [build-dependencies]
 tonic-prost-build.workspace = true

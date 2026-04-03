@@ -48,8 +48,64 @@ Voici quelques possibilités pour y parvenir :
 
 ### Exemple avec Docker Compose et Traefik
 
-Cet exemple montre comment est déployé le serveur officiel (accessible via <https://rusty.anclarma.fr>
-).
+Cet exemple montre comment est déployé le serveur officiel (accessible via <https://rusty.anclarma.fr>).
+
+```mermaid
+flowchart TD
+  %% =======================
+  %% USER LAYER
+  %% =======================
+  subgraph USER["User"]
+    B[Browser]
+    C[CLI]
+  end
+
+  %% =======================
+  %% SERVER LAYER
+  %% =======================
+  subgraph SERVER["Server Side"]
+    subgraph EDGE["Edge / Gateway"]
+      T[Traefik]
+    end
+
+    subgraph PUBLIC["Public Services"]
+      GF[game_frontend]
+      GS[game_server]
+      AUTH[rauthy]
+    end
+
+    subgraph INTERNAL["Internal Services"]
+      CRUD[crud_server]
+      MIG[migration]
+      PG[(Postgres)]
+    end
+  end
+
+  %% =======================
+  %% USER → EDGE
+  %% =======================
+  USER -->|https://rusty.anclarma.fr| T
+  USER -->|https://auth.rusty.anclarma.fr| T
+
+  %% =======================
+  %% EDGE → SERVICES
+  %% =======================
+  T -->|frontend| GF
+  T -->|gRPC-Web / Browser| GS
+  T -->|gRPC / CLI| GS
+  T -->|auth| AUTH
+
+  %% =======================
+  %% INTERNAL SERVICE FLOW
+  %% =======================
+  GS -->|gRPC| CRUD
+  CRUD -->|SQL| PG
+  MIG -->|init DB| PG
+
+  PG --> MIG
+  MIG --> CRUD
+  PG --> CRUD
+```
 
 (Le fichier `.env` est dérivé de `sample.env`.)
 
@@ -129,9 +185,18 @@ services:
       - acme:/acme:rw
     networks:
       - traefik-network
+  rauthy:
+    image: ghcr.io/sebadob/rauthy:0.35.0
+    restart: always
+    volumes:
+      - ./rauthy/config.toml:/app/config.toml:ro
+      - rauthy-data:/app/data:rw
+    networks:
+      - traefik-network
 
 volumes:
   acme:
+  rauthy-data:
 
 networks:
   rusty-network:
@@ -191,6 +256,13 @@ http:
         - websecure
       tls:
         certresolver: myresolver
+    rauthy:
+      rule: "Host(`auth.rusty.anclarma.fr`)"
+      service: rauthy-service
+      entryPoints:
+        - websecure
+      tls:
+        certresolver: myresolver
 
   middlewares:
     compress:
@@ -205,6 +277,43 @@ http:
       loadBalancer:
         servers:
           - url: "h2c://game_server:3000"
+    rauthy-service:
+      loadBalancer:
+        servers:
+          - url: "http://rauthy:8080"
+```
+
+rauthy/config.toml
+
+```toml
+[encryption]
+# echo "$(openssl rand -hex 4)/$(openssl rand -base64 32)"
+keys = [
+  'REDACTED/REDACTED',
+  'REDACTED/REDACTED',
+]
+key_active = 'REDACTED'
+
+[cluster]
+node_id = 1
+# echo "$(openssl rand -hex 32)"
+secret_raft = 'REDACTED'
+secret_api = 'REDACTED'
+
+[server]
+scheme = 'http'
+pub_url = 'auth.rusty.anclarma.fr'
+proxy_mode = true
+trusted_proxies = [
+    '172.16.0.0/12',
+]
+
+[webauthn]
+rp_id = 'auth.rusty.anclarma.fr'
+rp_origin = 'https://auth.rusty.anclarma.fr:443'
+
+[mfa]
+admin_force_mfa = false
 ```
 
 ### Exemple avec Kubernetes

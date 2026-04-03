@@ -1,6 +1,8 @@
+pub mod auth;
 pub mod service;
 
 use crate::{
+    auth::AuthInterceptor,
     pb::{
         crud::v1::{
             building_service_client::BuildingServiceClient,
@@ -13,6 +15,8 @@ use crate::{
     },
     service::{MyBuildingService, MyFortressService},
 };
+use jsonwebtoken::jwk::JwkSet;
+use std::sync::Arc;
 use tokio::signal::unix::{SignalKind, signal};
 use tonic::transport::Server;
 use tonic_web::GrpcWebLayer;
@@ -61,9 +65,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::]:3000".parse()?;
     let crud_server_url =
         std::env::var("CRUD_SERVER_URL").map_err(|e| format!("CRUD_SERVER_URL {e}"))?;
+    let auth_url =
+        std::env::var("AUTH_URL").unwrap_or_else(|_| "https://auth.rusty.anclarma.fr".to_string());
+    let issuer_url = std::env::var("ISSUER_URL").unwrap_or_else(|_| auth_url.clone());
+
+    info!("Downloading public keys from Rauthy ({auth_url})...");
+    let jwks_url = format!("{auth_url}/auth/v1/oidc/certs");
+    let jwks: JwkSet = reqwest::Client::new()
+        .get(&jwks_url)
+        .send()
+        .await
+        .map_err(|e| format!("Unable to reach Rauthy: {e}"))?
+        .json()
+        .await
+        .map_err(|e| format!("JWKS parsing error: {e}"))?;
+
+    let auth_interceptor = AuthInterceptor {
+        jwks: Arc::new(jwks),
+        issuer: format!("{issuer_url}/auth/v1/"),
+    };
+
     let crud_building_client = BuildingServiceClient::connect(crud_server_url.clone()).await?;
     let crud_fortress_client = FortressServiceClient::connect(crud_server_url).await?;
-    let building_service = MyBuildingService::new(crud_building_client.clone());
+    let building_service =
+        MyBuildingService::new(crud_building_client.clone(), crud_fortress_client.clone());
     let fortress_service = MyFortressService::new(crud_building_client, crud_fortress_client);
 
     info!("Listening on {addr}");
@@ -72,8 +97,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .accept_http1(true)
         .layer(CorsLayer::permissive())
         .layer(GrpcWebLayer::new())
-        .add_service(BuildingServiceServer::new(building_service))
-        .add_service(FortressServiceServer::new(fortress_service))
+        .add_service(BuildingServiceServer::with_interceptor(
+            building_service,
+            auth_interceptor.clone(),
+        ))
+        .add_service(FortressServiceServer::with_interceptor(
+            fortress_service,
+            auth_interceptor,
+        ))
         .serve_with_shutdown(addr, shutdown_signal())
         .await?;
 

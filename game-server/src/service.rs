@@ -1,27 +1,32 @@
-use crate::pb::{
-    common::v1::{Costs, NewBuilding, NewFortress},
-    crud::v1::{
-        CollectFortressResourceRequest, ResourceKind, UpgradeBuildingAtomicRequest,
-        building_service_client::BuildingServiceClient,
-        fortress_service_client::FortressServiceClient,
-    },
-    game::v1::{
-        CollectFortressEnergyRequest, CollectFortressEnergyResponse, CollectFortressFoodRequest,
-        CollectFortressFoodResponse, CollectFortressGoldRequest, CollectFortressGoldResponse,
-        CollectFortressWoodRequest, CollectFortressWoodResponse, CreateFortressRequest,
-        CreateFortressResponse, DeleteFortressRequest, DeleteFortressResponse, GetBuildingRequest,
-        GetBuildingResponse, GetFortressEnergyRequest, GetFortressEnergyResponse,
-        GetFortressFoodRequest, GetFortressFoodResponse, GetFortressGoldRequest,
-        GetFortressGoldResponse, GetFortressRequest, GetFortressResponse, GetFortressWoodRequest,
-        GetFortressWoodResponse, GetImproveBuildingCostsRequest, GetImproveBuildingCostsResponse,
-        ImproveBuildingRequest, ImproveBuildingResponse, ListBuildingsByFortressRequest,
-        ListBuildingsByFortressResponse, ListBuildingsRequest, ListBuildingsResponse,
-        ListFortressesRequest, ListFortressesResponse, building_service_server::BuildingService,
-        fortress_service_server::FortressService,
+use crate::{
+    auth::Claims,
+    pb::{
+        common::v1::{Costs, NewBuilding, NewFortress},
+        crud::v1::{
+            CollectFortressResourceRequest, ResourceKind, UpgradeBuildingAtomicRequest,
+            building_service_client::BuildingServiceClient,
+            fortress_service_client::FortressServiceClient,
+        },
+        game::v1::{
+            CollectFortressEnergyRequest, CollectFortressEnergyResponse,
+            CollectFortressFoodRequest, CollectFortressFoodResponse, CollectFortressGoldRequest,
+            CollectFortressGoldResponse, CollectFortressWoodRequest, CollectFortressWoodResponse,
+            CreateFortressRequest, CreateFortressResponse, DeleteFortressRequest,
+            DeleteFortressResponse, GetBuildingRequest, GetBuildingResponse,
+            GetFortressEnergyRequest, GetFortressEnergyResponse, GetFortressFoodRequest,
+            GetFortressFoodResponse, GetFortressGoldRequest, GetFortressGoldResponse,
+            GetFortressRequest, GetFortressResponse, GetFortressWoodRequest,
+            GetFortressWoodResponse, GetImproveBuildingCostsRequest,
+            GetImproveBuildingCostsResponse, ImproveBuildingRequest, ImproveBuildingResponse,
+            ListBuildingsByFortressRequest, ListBuildingsByFortressResponse, ListBuildingsRequest,
+            ListBuildingsResponse, ListFortressesRequest, ListFortressesResponse,
+            building_service_server::BuildingService, fortress_service_server::FortressService,
+        },
     },
 };
 use tonic::{Request, Response, Status};
 
+const FORTRESSES_PER_USER_LIMIT: usize = 5;
 const MAX_BUILDING_LEVEL: i32 = 20;
 const BASE_COST: i32 = 10;
 const GOLD_BONUS_BUILDING: &str = "bank";
@@ -51,17 +56,59 @@ fn get_costs(level: i32, level_max: i32) -> Costs {
     }
 }
 
+fn get_user<T>(request: &Request<T>) -> Result<Claims, Status> {
+    request
+        .extensions()
+        .get::<Claims>()
+        .cloned()
+        .ok_or_else(|| Status::unauthenticated("You must be logged in."))
+}
+
 pub struct MyBuildingService {
     crud_building_client: BuildingServiceClient<tonic::transport::Channel>,
+    crud_fortress_client: FortressServiceClient<tonic::transport::Channel>,
 }
 
 impl MyBuildingService {
     pub const fn new(
         crud_building_client: BuildingServiceClient<tonic::transport::Channel>,
+        crud_fortress_client: FortressServiceClient<tonic::transport::Channel>,
     ) -> Self {
         Self {
             crud_building_client,
+            crud_fortress_client,
         }
+    }
+
+    async fn verify_building_ownership(
+        &self,
+        building_id: i32,
+        user: &Claims,
+    ) -> Result<crate::pb::common::v1::Building, Status> {
+        let building = self
+            .crud_building_client
+            .clone()
+            .get_building(crate::pb::crud::v1::GetBuildingRequest { id: building_id })
+            .await?
+            .into_inner()
+            .building
+            .ok_or_else(|| Status::not_found("Building not found"))?;
+        let fortress = self
+            .crud_fortress_client
+            .clone()
+            .get_fortress(crate::pb::crud::v1::GetFortressRequest {
+                id: building.fortress_id,
+            })
+            .await?
+            .into_inner()
+            .fortress
+            .ok_or_else(|| Status::not_found("Fortress not found"))?;
+        if fortress.owner_id != user.sub && !user.is_admin() {
+            return Err(Status::permission_denied(
+                "Action refused: This fortress belongs to another player.",
+            ));
+        }
+        Ok(building)
     }
 }
 
@@ -123,17 +170,9 @@ impl BuildingService for MyBuildingService {
         &self,
         request: Request<ImproveBuildingRequest>,
     ) -> Result<Response<ImproveBuildingResponse>, Status> {
+        let user = get_user(&request)?;
         let building_id = request.into_inner().id;
-        let building = self
-            .crud_building_client
-            .clone()
-            .get_building(Request::new(crate::pb::crud::v1::GetBuildingRequest {
-                id: building_id,
-            }))
-            .await?
-            .into_inner()
-            .building
-            .ok_or_else(|| Status::not_found("building not found"))?;
+        let building = self.verify_building_ownership(building_id, &user).await?;
         let costs = get_costs(building.level, MAX_BUILDING_LEVEL);
         let upgrade_req = UpgradeBuildingAtomicRequest {
             building_id,
@@ -191,16 +230,60 @@ impl MyFortressService {
             crud_fortress_client,
         }
     }
+
+    async fn verify_fortress_ownership(
+        &self,
+        fortress_id: i32,
+        user: &Claims,
+    ) -> Result<crate::pb::common::v1::Fortress, Status> {
+        let fortress = self
+            .crud_fortress_client
+            .clone()
+            .get_fortress(crate::pb::crud::v1::GetFortressRequest { id: fortress_id })
+            .await?
+            .into_inner()
+            .fortress
+            .ok_or_else(|| Status::not_found("Fortress not found"))?;
+        if fortress.owner_id != user.sub && !user.is_admin() {
+            return Err(Status::permission_denied(
+                "Action refused: This fortress belongs to another player.",
+            ));
+        }
+        Ok(fortress)
+    }
 }
 
 #[tonic::async_trait]
 impl FortressService for MyFortressService {
     async fn create_fortress(
         &self,
-        _request: Request<CreateFortressRequest>,
+        request: Request<CreateFortressRequest>,
     ) -> Result<Response<CreateFortressResponse>, Status> {
+        let user = get_user(&request)?;
+
+        if !user.is_admin() {
+            let list_fortresses_request = crate::pb::crud::v1::ListFortressesRequest {};
+
+            let fortresses = self
+                .crud_fortress_client
+                .clone()
+                .list_fortresses(list_fortresses_request)
+                .await?
+                .into_inner()
+                .fortresses;
+            let count = fortresses.iter().filter(|f| f.owner_id == user.sub).count();
+            if count >= FORTRESSES_PER_USER_LIMIT {
+                return Err(Status::resource_exhausted(format!(
+                    "You have reached the limit of {FORTRESSES_PER_USER_LIMIT} fortresses."
+                )));
+            }
+        }
+
+        tracing::info!("Player {} creates a fortress", user.sub);
+
         let create_fortress_request = crate::pb::crud::v1::CreateFortressRequest {
             fortress: Some(NewFortress {
+                owner_id: user.sub,
                 gold: 0,
                 food: 0,
                 wood: 0,
@@ -284,9 +367,11 @@ impl FortressService for MyFortressService {
         &self,
         request: Request<DeleteFortressRequest>,
     ) -> Result<Response<DeleteFortressResponse>, Status> {
-        let delete_fortress_request = crate::pb::crud::v1::DeleteFortressRequest {
-            id: request.into_inner().id,
-        };
+        let user = get_user(&request)?;
+        let fortress_id = request.get_ref().id;
+        let _fortress = self.verify_fortress_ownership(fortress_id, &user).await?;
+        let delete_fortress_request =
+            crate::pb::crud::v1::DeleteFortressRequest { id: fortress_id };
         let success = self
             .crud_fortress_client
             .clone()
@@ -345,8 +430,11 @@ impl FortressService for MyFortressService {
         &self,
         request: Request<CollectFortressGoldRequest>,
     ) -> Result<Response<CollectFortressGoldResponse>, Status> {
+        let user = get_user(&request)?;
+        let fortress_id = request.get_ref().id;
+        let _fortress = self.verify_fortress_ownership(fortress_id, &user).await?;
         let collect_request = CollectFortressResourceRequest {
-            id: request.into_inner().id,
+            id: fortress_id,
             resource: ResourceKind::Gold as i32,
             bonus_building_name: GOLD_BONUS_BUILDING.to_string(),
             base: None,
@@ -387,8 +475,11 @@ impl FortressService for MyFortressService {
         &self,
         request: Request<CollectFortressFoodRequest>,
     ) -> Result<Response<CollectFortressFoodResponse>, Status> {
+        let user = get_user(&request)?;
+        let fortress_id = request.get_ref().id;
+        let _fortress = self.verify_fortress_ownership(fortress_id, &user).await?;
         let collect_request = CollectFortressResourceRequest {
-            id: request.into_inner().id,
+            id: fortress_id,
             resource: ResourceKind::Food as i32,
             bonus_building_name: FOOD_BONUS_BUILDING.to_string(),
             base: None,
@@ -429,8 +520,11 @@ impl FortressService for MyFortressService {
         &self,
         request: Request<CollectFortressWoodRequest>,
     ) -> Result<Response<CollectFortressWoodResponse>, Status> {
+        let user = get_user(&request)?;
+        let fortress_id = request.get_ref().id;
+        let _fortress = self.verify_fortress_ownership(fortress_id, &user).await?;
         let collect_request = CollectFortressResourceRequest {
-            id: request.into_inner().id,
+            id: fortress_id,
             resource: ResourceKind::Wood as i32,
             bonus_building_name: WOOD_BONUS_BUILDING.to_string(),
             base: None,
@@ -472,8 +566,11 @@ impl FortressService for MyFortressService {
         &self,
         request: Request<CollectFortressEnergyRequest>,
     ) -> Result<Response<CollectFortressEnergyResponse>, Status> {
+        let user = get_user(&request)?;
+        let fortress_id = request.get_ref().id;
+        let _fortress = self.verify_fortress_ownership(fortress_id, &user).await?;
         let collect_request = CollectFortressResourceRequest {
-            id: request.into_inner().id,
+            id: fortress_id,
             resource: ResourceKind::Energy as i32,
             bonus_building_name: ENERGY_BONUS_BUILDING.to_string(),
             base: None,

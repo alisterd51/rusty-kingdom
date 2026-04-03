@@ -1,5 +1,6 @@
 use crate::i18n::{Locale, t, use_i18n};
 use leptos::prelude::*;
+use leptos_oidc::{Authenticated, LoginLink, LogoutLink};
 use leptos_router::components::A;
 
 #[component]
@@ -25,6 +26,14 @@ pub fn NavMenu() -> impl IntoView {
             <a href="https://github.com/alisterd51/rusty-kingdom">{t!(i18n, github)}</a>
             " | "
             <button on:click=on_switch>{t!(i18n, lang)}</button>
+            " | "
+            <Authenticated unauthenticated=move || {
+                view! { <LoginLink class="auth-link">{t!(i18n, login)}</LoginLink> }
+            }>
+                <span>{t!(i18n, connected)}</span>
+                " | "
+                <LogoutLink class="auth-link">{t!(i18n, logout)}</LogoutLink>
+            </Authenticated>
         </nav>
     }
 }

@@ -1,12 +1,9 @@
 use crate::{
-    app::{ResourceView, get_client, use_id_param},
+    app::{ResourceView, get_building_client, get_token, use_id_param},
     i18n::{t, use_i18n},
     pb::{
         common::v1::Costs,
-        game::v1::{
-            GetBuildingRequest, GetImproveBuildingCostsRequest, ImproveBuildingRequest,
-            building_service_client::BuildingServiceClient,
-        },
+        game::v1::{GetBuildingRequest, GetImproveBuildingCostsRequest, ImproveBuildingRequest},
     },
 };
 use leptos::prelude::*;
@@ -20,9 +17,10 @@ pub fn BuildingDetail() -> impl IntoView {
     let data_resource = LocalResource::new(move || {
         let id = id_signal();
         refresh_trigger.get();
+        let token = get_token();
         async move {
             let Some(id) = id else { return Ok(None) };
-            let mut building_client = BuildingServiceClient::new(get_client());
+            let mut building_client = get_building_client(token.clone());
             let building_req = tonic::Request::new(GetBuildingRequest { id });
             let building = match building_client.get_building(building_req).await {
                 Ok(resp) => match resp.into_inner().building {
@@ -38,7 +36,7 @@ pub fn BuildingDetail() -> impl IntoView {
                     return Err(status.to_string());
                 }
             };
-            let mut cost_client = BuildingServiceClient::new(get_client());
+            let mut cost_client = get_building_client(token);
             let cost_req = tonic::Request::new(GetImproveBuildingCostsRequest { id });
             let costs = cost_client
                 .get_improve_building_costs(cost_req)
@@ -51,8 +49,9 @@ pub fn BuildingDetail() -> impl IntoView {
     });
     let improve_action = Action::new_local(move |id: &i32| {
         let id = *id;
+        let token = get_token();
         async move {
-            let mut client = BuildingServiceClient::new(get_client());
+            let mut client = get_building_client(token);
             let request = tonic::Request::new(ImproveBuildingRequest { id });
             if (client.improve_building(request).await).is_ok() {
                 set_refresh_trigger.update(|n| *n += 1);

@@ -32,6 +32,7 @@ jobs:
             target/release/crud-server
             target/release/game-server
             target/release/migration
+            target/release/rauthy-init
 
   container-build:
     uses: ./.github/workflows/container-ci.yaml

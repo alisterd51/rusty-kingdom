@@ -2,6 +2,7 @@
 
 CREATE TABLE fortresses (
     id SERIAL PRIMARY KEY,
+    owner_id VARCHAR NOT NULL,
     gold INTEGER NOT NULL,
     food INTEGER NOT NULL,
     wood INTEGER NOT NULL,

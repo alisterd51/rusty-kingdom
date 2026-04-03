@@ -23,17 +23,19 @@ message UpdateBuilding {
 
 message Fortress {
   int32 id = 1;
+  string owner_id = 2;
+  int32 gold = 3;
+  int32 food = 4;
+  int32 wood = 5;
+  int32 energy = 6;
+}
+
+message NewFortress {
+  string owner_id = 1;
   int32 gold = 2;
   int32 food = 3;
   int32 wood = 4;
   int32 energy = 5;
-}
-
-message NewFortress {
-  int32 gold = 1;
-  int32 food = 2;
-  int32 wood = 3;
-  int32 energy = 4;
 }
 
 message UpdateFortress {
