@@ -188,11 +188,26 @@ services:
   rauthy:
     image: ghcr.io/sebadob/rauthy:0.35.0
     restart: always
+    environment:
+      ENC_KEYS: ${ENC_KEYS}
+      ENC_KEY_ACTIVE: ${ENC_KEY_ACTIVE}
+      HQL_SECRET_RAFT: ${HQL_SECRET_RAFT}
+      HQL_SECRET_API: ${HQL_SECRET_API}
+      BOOTSTRAP_API_KEY: ${BOOTSTRAP_API_KEY}
+      BOOTSTRAP_API_KEY_SECRET: ${BOOTSTRAP_API_KEY_SECRET}
     volumes:
       - ./rauthy/config.toml:/app/config.toml:ro
       - rauthy-data:/app/data:rw
     networks:
       - traefik-network
+  rauthy-init:
+    image: ghcr.io/alisterd51/rusty-rauthy-init:latest
+    restart: on-failure
+    environment:
+      BOOTSTRAP_API_KEY_NAME: "bootstrap"
+      BOOTSTRAP_API_KEY_SECRET: ${BOOTSTRAP_API_KEY_SECRET}
+    networks:
+      - rauthy-network
 
 volumes:
   acme:
@@ -287,18 +302,9 @@ rauthy/config.toml
 
 ```toml
 [encryption]
-# echo "$(openssl rand -hex 4)/$(openssl rand -base64 32)"
-keys = [
-  'REDACTED/REDACTED',
-  'REDACTED/REDACTED',
-]
-key_active = 'REDACTED'
 
 [cluster]
 node_id = 1
-# echo "$(openssl rand -hex 32)"
-secret_raft = 'REDACTED'
-secret_api = 'REDACTED'
 
 [server]
 scheme = 'http'
