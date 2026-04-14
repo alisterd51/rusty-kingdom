@@ -85,19 +85,44 @@ enum BuildingCommands {
 
 #[derive(Subcommand, Clone)]
 enum FortressCommands {
-    GetAll,
+    GetAll {
+        #[arg(long, help = "Only show my fortresses")]
+        mine: bool,
+    },
     New,
-    Get { fortress_id: i32 },
-    Delete { fortress_id: i32 },
-    GetGold { fortress_id: i32 },
-    CollectGold { fortress_id: i32 },
-    GetFood { fortress_id: i32 },
-    CollectFood { fortress_id: i32 },
-    GetWood { fortress_id: i32 },
-    CollectWood { fortress_id: i32 },
-    GetEnergy { fortress_id: i32 },
-    CollectEnergy { fortress_id: i32 },
-    GetAllBuildings { fortress_id: i32 },
+    Get {
+        fortress_id: i32,
+    },
+    Delete {
+        fortress_id: i32,
+    },
+    GetGold {
+        fortress_id: i32,
+    },
+    CollectGold {
+        fortress_id: i32,
+    },
+    GetFood {
+        fortress_id: i32,
+    },
+    CollectFood {
+        fortress_id: i32,
+    },
+    GetWood {
+        fortress_id: i32,
+    },
+    CollectWood {
+        fortress_id: i32,
+    },
+    GetEnergy {
+        fortress_id: i32,
+    },
+    CollectEnergy {
+        fortress_id: i32,
+    },
+    GetAllBuildings {
+        fortress_id: i32,
+    },
 }
 
 #[derive(Clone)]
@@ -127,9 +152,9 @@ async fn handle_fortress(
     cmd: FortressCommands,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match cmd {
-        FortressCommands::GetAll => {
+        FortressCommands::GetAll { mine } => {
             let response = fortress_client
-                .list_fortresses(ListFortressesRequest {})
+                .list_fortresses(ListFortressesRequest { only_mine: mine })
                 .await?
                 .into_inner();
             println!("{}", json!(response.fortresses));

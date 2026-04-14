@@ -488,14 +488,18 @@ impl FortressService for MyFortressService {
 
     async fn list_fortresses(
         &self,
-        _request: Request<ListFortressesRequest>,
+        request: Request<ListFortressesRequest>,
     ) -> Result<Response<ListFortressesResponse>, Status> {
         let mut conn = self
             .pool
             .get()
             .map_err(|e| Status::internal(format!("{e}")))?;
-        let fortresses: Vec<Fortress> = fortresses::table
-            .get_results(&mut conn)
+        let mut query = fortresses::table.into_boxed();
+        if let Some(owner) = request.into_inner().owner_id {
+            query = query.filter(fortresses::owner_id.eq(owner));
+        }
+        let fortresses: Vec<Fortress> = query
+            .load(&mut conn)
             .map_err(|e| Status::internal(format!("{e}")))?;
         let fortresses = ListFortressesResponse {
             fortresses: fortresses.into_iter().map(Into::into).collect(),

@@ -4,19 +4,21 @@ use crate::{
     pb::game::v1::{CreateFortressRequest, DeleteFortressRequest, ListFortressesRequest},
 };
 use leptos::prelude::*;
-use leptos_router::components::A;
+use leptos_router::{components::A, hooks::use_query_map};
 
 #[component]
 pub fn FortressList() -> impl IntoView {
     let i18n = use_i18n();
+    let query = use_query_map();
     let (refresh_trigger, set_refresh_trigger) = signal(0);
     let fortresses_resource = LocalResource::new(move || {
         refresh_trigger.get();
         let token = get_token();
+        let is_mine = query.get().get("mine").is_some_and(|v| v == "true");
 
         async move {
             let mut fortress_client = get_fortress_client(token);
-            let request = tonic::Request::new(ListFortressesRequest {});
+            let request = tonic::Request::new(ListFortressesRequest { only_mine: is_mine });
             let response = fortress_client.list_fortresses(request).await;
             response
                 .map(tonic::Response::into_inner)

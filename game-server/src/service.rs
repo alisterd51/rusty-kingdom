@@ -262,8 +262,9 @@ impl FortressService for MyFortressService {
         let user = get_user(&request)?;
 
         if !user.is_admin() {
-            let list_fortresses_request = crate::pb::crud::v1::ListFortressesRequest {};
-
+            let list_fortresses_request = crate::pb::crud::v1::ListFortressesRequest {
+                owner_id: Some(user.sub.clone()),
+            };
             let fortresses = self
                 .crud_fortress_client
                 .clone()
@@ -271,7 +272,7 @@ impl FortressService for MyFortressService {
                 .await?
                 .into_inner()
                 .fortresses;
-            let count = fortresses.iter().filter(|f| f.owner_id == user.sub).count();
+            let count = fortresses.len();
             if count >= FORTRESSES_PER_USER_LIMIT {
                 return Err(Status::resource_exhausted(format!(
                     "You have reached the limit of {FORTRESSES_PER_USER_LIMIT} fortresses."
@@ -387,18 +388,29 @@ impl FortressService for MyFortressService {
 
     async fn list_fortresses(
         &self,
-        _request: Request<ListFortressesRequest>,
+        request: Request<ListFortressesRequest>,
     ) -> Result<Response<ListFortressesResponse>, Status> {
-        let list_fortresses_request = crate::pb::crud::v1::ListFortressesRequest {};
-
-        let fortresses = self
-            .crud_fortress_client
-            .clone()
-            .list_fortresses(list_fortresses_request)
-            .await?
-            .into_inner()
-            .fortresses;
-
+        let fortresses = if request.get_ref().only_mine {
+            let user = get_user(&request)?;
+            let list_fortresses_request = crate::pb::crud::v1::ListFortressesRequest {
+                owner_id: Some(user.sub),
+            };
+            self.crud_fortress_client
+                .clone()
+                .list_fortresses(list_fortresses_request)
+                .await?
+                .into_inner()
+                .fortresses
+        } else {
+            let list_fortresses_request =
+                crate::pb::crud::v1::ListFortressesRequest { owner_id: None };
+            self.crud_fortress_client
+                .clone()
+                .list_fortresses(list_fortresses_request)
+                .await?
+                .into_inner()
+                .fortresses
+        };
         let message = ListFortressesResponse { fortresses };
 
         Ok(Response::new(message))

@@ -118,7 +118,9 @@ message DeleteFortressResponse {
   bool success = 1;
 }
 
-message ListFortressesRequest {}
+message ListFortressesRequest {
+  bool only_mine = 1;
+}
 message ListFortressesResponse {
   repeated common.v1.Fortress fortresses = 1;
 }
