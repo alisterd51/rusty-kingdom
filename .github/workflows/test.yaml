@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   stable:
     uses: ./.github/workflows/rust-ci.yaml
