@@ -53,9 +53,9 @@ Cet exemple montre comment est déployé le serveur officiel (accessible via <ht
 ```mermaid
 flowchart TD
   %% =======================
-  %% USER LAYER
+  %% CLIENT LAYER
   %% =======================
-  subgraph USER["User"]
+  subgraph CLIENT["Client Side"]
     B[Browser]
     C[CLI]
   end
@@ -74,18 +74,21 @@ flowchart TD
       AUTH[rauthy]
     end
 
-    subgraph INTERNAL["Internal Services"]
+    subgraph PRIVATE["Private Services"]
       CRUD[crud_server]
       MIG[migration]
       PG[(Postgres)]
+      RINIT[rauthy-init]
     end
   end
 
+  AUTH ~~~ RINIT
+
   %% =======================
-  %% USER → EDGE
+  %% CLIENT → EDGE
   %% =======================
-  USER -->|https://rusty.anclarma.fr| T
-  USER -->|https://auth.rusty.anclarma.fr| T
+  CLIENT -->|https://rusty.anclarma.fr| T
+  CLIENT -->|https://auth.rusty.anclarma.fr| T
 
   %% =======================
   %% EDGE → SERVICES
@@ -101,10 +104,7 @@ flowchart TD
   GS -->|gRPC| CRUD
   CRUD -->|SQL| PG
   MIG -->|init DB| PG
-
-  PG --> MIG
-  MIG --> CRUD
-  PG --> CRUD
+  RINIT -->|Init Rauthy| AUTH
 ```
 
 (Le fichier `.env` est dérivé de `sample.env`.)
@@ -155,6 +155,8 @@ services:
     restart: always
     environment:
       CRUD_SERVER_URL: "http://crud_server:3000"
+      AUTH_URL: "http://rauthy:8080"
+      ISSUER_URL: "https://auth.rusty.anclarma.fr"
     networks:
       - rusty-network
       - traefik-network
