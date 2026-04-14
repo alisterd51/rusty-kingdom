@@ -188,7 +188,7 @@ services:
     networks:
       - traefik-network
   rauthy:
-    image: ghcr.io/sebadob/rauthy:0.35.0
+    image: ghcr.io/sebadob/rauthy:0.35.1
     restart: always
     environment:
       ENC_KEYS: ${ENC_KEYS}
