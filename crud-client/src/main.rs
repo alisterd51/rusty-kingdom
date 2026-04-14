@@ -33,7 +33,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // println!("{:?}", response.into_inner().fortress);
 
     let response = client
-        .list_fortresses(tonic::Request::new(ListFortressesRequest {}))
+        .list_fortresses(tonic::Request::new(ListFortressesRequest {
+            owner_id: None,
+        }))
         .await?;
     println!("{:?}", response.into_inner().fortresses);
 

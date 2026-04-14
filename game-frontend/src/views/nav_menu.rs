@@ -30,6 +30,8 @@ pub fn NavMenu() -> impl IntoView {
             <Authenticated unauthenticated=move || {
                 view! { <LoginLink class="auth-link">{t!(i18n, login)}</LoginLink> }
             }>
+                <A href="/fortresses?mine=true">{t!(i18n, my_fortresses)}</A>
+                " | "
                 <span>{t!(i18n, connected)}</span>
                 " | "
                 <LogoutLink class="auth-link">{t!(i18n, logout)}</LogoutLink>

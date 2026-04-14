@@ -12,7 +12,7 @@ members = [
 	"rauthy-init",
 ]
 
-package.version = "0.12.0"
+package.version = "0.12.1"
 package.edition = "2024"
 
 [workspace.dependencies]
