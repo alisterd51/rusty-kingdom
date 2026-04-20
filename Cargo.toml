@@ -1,3 +1,5 @@
+cargo-features = ["panic-immediate-abort"]
+
 [workspace]
 resolver = "3"
 members = [
@@ -54,8 +56,11 @@ unwrap_used = "deny"
 expect_used = "deny"
 
 [profile.release]
-panic = "abort"
+panic = "immediate-abort"
 codegen-units = 1
 lto = true
 strip = true
-opt-level = "s"
+opt-level = "z"
+
+[profile.bench]
+panic = "unwind"
