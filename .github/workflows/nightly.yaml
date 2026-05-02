@@ -21,7 +21,7 @@ jobs:
           cargo build --release --target x86_64-unknown-linux-musl -p crud-client -p game-client
       - name: Build servers
         run: |
-          cargo build --release -p crud-server -p game-server -p migration
+          cargo build --release -p crud-server -p game-server -p migration -p rauthy-init
       - name: Create nightly tag
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:

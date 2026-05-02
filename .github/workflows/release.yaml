@@ -21,7 +21,7 @@ jobs:
           cargo build --release --target x86_64-unknown-linux-musl -p crud-client -p game-client
       - name: Build servers
         run: |
-          cargo build --release -p crud-server -p game-server -p migration
+          cargo build --release -p crud-server -p game-server -p migration -p rauthy-init
       - name: Release
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
         with:
