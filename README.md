@@ -122,6 +122,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql:rw
     networks:
       - rusty-network
     healthcheck:
@@ -214,6 +216,7 @@ services:
       - rauthy-network
 
 volumes:
+  postgres-data:
   acme:
   rauthy-data:
 
