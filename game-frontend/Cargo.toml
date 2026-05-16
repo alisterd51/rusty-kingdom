@@ -5,21 +5,21 @@ edition.workspace = true
 
 [dependencies]
 # leptos
-leptos = { version = "0.8", features = ["csr"] }
-leptos_router = "0.8"
-leptos_i18n = { version = "0.6", features = ["csr"] }
-leptos_oidc = "0.9"
+leptos.workspace = true
+leptos_router.workspace = true
+leptos_i18n.workspace = true
+leptos_oidc.workspace = true
 # gRPC / protobuf
-tonic-web-wasm-client = "0.9"
+prost.workspace = true
 tonic = { version = "0.14", default-features = false, features = ["codegen"] }
-tonic-prost = "0.14"
-prost = "0.14"
+tonic-web-wasm-client.workspace = true
+tonic-prost.workspace = true
 
 [build-dependencies]
 # leptos
-leptos_i18n_build = { version = "0.6", features = ["csr"] }
+leptos_i18n_build.workspace = true
 # gRPC / protobuf
-tonic-prost-build = "0.14"
+tonic-prost-build.workspace = true
 
 [lints]
 workspace = true

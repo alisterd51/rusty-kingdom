@@ -22,7 +22,7 @@ WORKDIR /game-frontend
 ARG BACKEND_URL="https://rusty.anclarma.fr"
 ARG FRONTEND_URL="https://rusty.anclarma.fr"
 ARG AUTH_URL="https://auth.rusty.anclarma.fr"
-RUN trunk build --frozen --release --minify
+RUN trunk build --frozen --release --cargo-profile wasm-release --minify
 
 FROM dhi.io/debian-base:trixie-dev AS runtime-common-libpq-libssl
 RUN apt-get update && apt-get install -y --no-install-recommends \
