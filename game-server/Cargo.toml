@@ -19,7 +19,7 @@ tonic-web.workspace = true
 tonic-prost.workspace = true
 # http
 reqwest.workspace = true
-tower-http = { version = "0.6.8", features = ["cors"] }
+tower-http.workspace = true
 # JWT
 jsonwebtoken.workspace = true
 

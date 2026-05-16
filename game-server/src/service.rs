@@ -604,7 +604,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_optimize_factor() {
+    fn optimize_factor_works() {
         let cost_max = i32::MAX;
         let levels = [10, 50, 100, 200, 1000];
 
@@ -617,7 +617,7 @@ mod tests {
 
     #[allow(clippy::cast_possible_truncation)]
     #[test]
-    fn test_upgrade_cost() {
+    fn upgrade_cost_works() {
         const FACTOR: f64 = 1.1012;
         let result = upgrade_cost(0, BASE_COST, FACTOR) as i32;
         assert_eq!(result, 10);
@@ -643,7 +643,7 @@ mod tests {
 
     #[allow(clippy::cast_possible_truncation)]
     #[test]
-    fn test_upgrade_cost_overflow() {
+    fn upgrade_cost_overflow() {
         const FACTOR: f64 = 1.1012;
         let result = upgrade_cost(250, BASE_COST, FACTOR) as i32;
         assert_eq!(result, i32::MAX);
@@ -655,7 +655,7 @@ mod tests {
 
     #[allow(clippy::cast_possible_truncation)]
     #[test]
-    fn test_level_slice() {
+    fn level_slice() {
         let cost_max = i32::MAX;
         let levels = [10, 50, 100, 200, 1000];
 

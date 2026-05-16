@@ -340,13 +340,26 @@ async fn handle_login(auth_url: &str, client_id: &str) -> Result<(), Box<dyn std
 
     let res_json = res.json::<serde_json::Value>().await?;
 
-    let device_code = res_json["device_code"].as_str().ok_or("No device_code")?;
-    let user_code = res_json["user_code"].as_str().ok_or("No user_code")?;
-    let verification_uri = res_json["verification_uri_complete"]
-        .as_str()
-        .or_else(|| res_json["verification_uri"].as_str())
+    let device_code = res_json
+        .get("device_code")
+        .and_then(|v| v.as_str())
+        .ok_or("No device_code")?;
+    let user_code = res_json
+        .get("user_code")
+        .and_then(|v| v.as_str())
+        .ok_or("No user_code")?;
+    let verification_uri = res_json
+        .get("verification_uri_complete")
+        .and_then(|v| v.as_str())
+        .or_else(|| {
+            let v = res_json.get("verification_uri")?;
+            v.as_str()
+        })
         .ok_or("No verification_uri")?;
-    let interval = res_json["interval"].as_u64().unwrap_or(5);
+    let interval = res_json
+        .get("interval")
+        .and_then(serde_json::Value::as_u64)
+        .unwrap_or(5);
 
     println!("====================================================");
     println!("Please open this URL in your browser :");
@@ -374,8 +387,9 @@ async fn handle_login(auth_url: &str, client_id: &str) -> Result<(), Box<dyn std
 
             fs::write(
                 ".rusty_token",
-                token_json["access_token"]
-                    .as_str()
+                token_json
+                    .get("access_token")
+                    .and_then(|v| v.as_str())
                     .ok_or("No access_token")?,
             )?;
             fs::write(".bot_token", serde_json::to_string_pretty(&token_json)?)?;
@@ -384,7 +398,7 @@ async fn handle_login(auth_url: &str, client_id: &str) -> Result<(), Box<dyn std
             break;
         }
         let err = token_res.json::<serde_json::Value>().await?;
-        let error_code = err["error"].as_str().unwrap_or("");
+        let error_code = err.get("error").and_then(|v| v.as_str()).unwrap_or("");
         if error_code != "authorization_pending" && error_code != "slow_down" {
             return Err(format!("Authentication failed: {error_code}").into());
         }
@@ -445,7 +459,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Bench { size } => {
             handle_bench(&mut game_fortress_client, size).await?;
         }
-        _ => unreachable!(),
+        _ => {}
     }
     Ok(())
 }

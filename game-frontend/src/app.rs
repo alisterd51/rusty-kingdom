@@ -82,7 +82,10 @@ pub fn get_building_client(
 
 pub fn use_id_param() -> impl Fn() -> Option<i32> + Copy {
     let params = use_params_map();
-    move || params.get().get("id").and_then(|i| i.parse::<i32>().ok())
+    move || {
+        let id = params.get().get("id")?;
+        id.parse::<i32>().ok()
+    }
 }
 
 #[component]

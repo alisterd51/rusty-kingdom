@@ -97,20 +97,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut i = 0;
     while i < 1000 {
-        let mut access_token = session["access_token"]
-            .as_str()
+        let mut access_token = session
+            .get("access_token")
+            .and_then(|v| v.as_str())
             .unwrap_or_default()
             .to_string();
-        let refresh_token = session["refresh_token"]
-            .as_str()
+        let refresh_token = session
+            .get("refresh_token")
+            .and_then(|v| v.as_str())
             .unwrap_or_default()
             .to_string();
 
         if access_token.is_empty() {
             println!("Initializing the session...");
             session = refresh_session(AUTH_URL, CLIENT_ID, &refresh_token).await?;
-            access_token = session["access_token"]
-                .as_str()
+            access_token = session
+                .get("access_token")
+                .and_then(|v| v.as_str())
                 .unwrap_or_default()
                 .to_string();
         }

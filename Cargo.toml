@@ -12,7 +12,7 @@ members = [
 	"rauthy-init",
 ]
 
-package.version = "0.12.2"
+package.version = "0.12.3"
 package.edition = "2024"
 
 [workspace.dependencies]
@@ -29,17 +29,25 @@ diesel_migrations = { version = "2", features = ["postgres"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # async
-tokio = { version = "1.51", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
 # gRPC / protobuf
 prost = "0.14"
 tonic = { version = "0.14", features = ["tls-aws-lc", "tls-native-roots"] }
 tonic-web = "0.14"
+tonic-web-wasm-client = "0.9"
 tonic-prost = "0.14"
 tonic-prost-build = "0.14"
 # http
 reqwest = { version = "0.13", features = ["blocking", "json"] }
+tower-http = { version = "0.6", features = ["cors"] }
 # JWT
 jsonwebtoken = { version = "10", features = ["aws_lc_rs"] }
+# leptos
+leptos = { version = "0.8", features = ["csr"] }
+leptos_router = "0.8"
+leptos_i18n = { version = "0.6", features = ["csr"] }
+leptos_i18n_build = { version = "0.6", features = ["csr"] }
+leptos_oidc = "0.9"
 
 [workspace.lints.rust]
 warnings = "deny"
@@ -52,10 +60,28 @@ nursery = "deny"
 # from clippy::restriction
 unwrap_used = "deny"
 expect_used = "deny"
+todo = "deny"
+unimplemented = "deny"
+unreachable = "deny"
+redundant_test_prefix = "deny"
+precedence_bits = "deny"
+return_and_then = "deny"
+map_with_unused_argument_over_ranges = "deny"
+string_lit_chars_any = "deny"
+redundant_type_annotations = "deny"
+if_then_some_else_none = "deny"
+string_slice = "deny"
+indexing_slicing = "deny"
+get_unwrap = "deny"
+unwrap_in_result = "deny"
+panic_in_result_fn = "deny"
 
 [profile.release]
 panic = "abort"
 codegen-units = 1
 lto = true
 strip = true
-opt-level = "s"
+
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"

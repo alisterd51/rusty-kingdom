@@ -69,11 +69,7 @@ pub fn FortressBuildingList() -> impl IntoView {
                                 }
                             />
                         </ul>
-                        {if is_empty {
-                            Some(view! { <p>{t!(i18n, buildings_not_found)}</p> })
-                        } else {
-                            None
-                        }}
+                        {is_empty.then(|| view! { <p>{t!(i18n, buildings_not_found)}</p> })}
                     }
                 }
             />
