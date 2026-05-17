@@ -15,7 +15,7 @@ pub fn FortressBuildingList() -> impl IntoView {
         let fortress_id = id_signal();
         async move {
             let Some(fortress_id) = fortress_id else {
-                return Err("Invalid Fortress ID".to_string());
+                return Err("Invalid Fortress ID".to_owned());
             };
             let mut service = get_building_client(token);
             let request = tonic::Request::new(ListBuildingsByFortressRequest { fortress_id });

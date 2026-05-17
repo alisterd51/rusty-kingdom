@@ -65,7 +65,7 @@ pub fn get_token() -> String {
 }
 
 fn get_client() -> Client {
-    Client::new(BACKEND_URL.to_string())
+    Client::new(BACKEND_URL.to_owned())
 }
 
 pub fn get_fortress_client(
@@ -91,12 +91,12 @@ pub fn use_id_param() -> impl Fn() -> Option<i32> + Copy {
 #[component]
 pub fn App() -> impl IntoView {
     let auth_parameters = AuthParameters {
-        issuer: AUTH_URL.to_string() + "/auth/v1",
-        client_id: CLIENT_ID.to_string(),
-        redirect_uri: FRONTEND_URL.to_string(),
-        post_logout_redirect_uri: FRONTEND_URL.to_string(),
+        issuer: AUTH_URL.to_owned() + "/auth/v1",
+        client_id: CLIENT_ID.to_owned(),
+        redirect_uri: FRONTEND_URL.to_owned(),
+        post_logout_redirect_uri: FRONTEND_URL.to_owned(),
         challenge: Challenge::S256,
-        scope: Some("openid profile email".to_string()),
+        scope: Some("openid profile email".to_owned()),
         audience: None,
     };
     let auth: AuthSignal = Auth::signal();
@@ -122,7 +122,7 @@ pub fn App() -> impl IntoView {
                                         auth.get()
                                             .error()
                                             .map_or_else(
-                                                || "Erreur inconnue".to_string(),
+                                                || "Erreur inconnue".to_owned(),
                                                 |e| format!("{e:?}"),
                                             )
                                     }}

@@ -17,8 +17,7 @@ pub struct Claims {
 impl Claims {
     #[must_use]
     pub fn is_admin(&self) -> bool {
-        self.roles.contains(&"admin".to_string())
-            || self.roles.contains(&"rauthy_admin".to_string())
+        self.roles.contains(&"admin".to_owned()) || self.roles.contains(&"rauthy_admin".to_owned())
     }
 }
 
@@ -75,5 +74,5 @@ fn extract_token(metadata: &MetadataMap) -> Result<String, Status> {
         .strip_prefix("Bearer ")
         .ok_or_else(|| Status::unauthenticated("Incorrect 'Bearer' format"))?;
 
-    Ok(token.to_string())
+    Ok(token.to_owned())
 }

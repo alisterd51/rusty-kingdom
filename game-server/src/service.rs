@@ -301,22 +301,22 @@ impl FortressService for MyFortressService {
             .ok_or_else(|| Status::not_found("fortress not found"))?;
         let new_buildings = [
             NewBuilding {
-                name: GOLD_BONUS_BUILDING.to_string(),
+                name: GOLD_BONUS_BUILDING.to_owned(),
                 level: 0,
                 fortress_id: fortress.id,
             },
             NewBuilding {
-                name: FOOD_BONUS_BUILDING.to_string(),
+                name: FOOD_BONUS_BUILDING.to_owned(),
                 level: 0,
                 fortress_id: fortress.id,
             },
             NewBuilding {
-                name: WOOD_BONUS_BUILDING.to_string(),
+                name: WOOD_BONUS_BUILDING.to_owned(),
                 level: 0,
                 fortress_id: fortress.id,
             },
             NewBuilding {
-                name: ENERGY_BONUS_BUILDING.to_string(),
+                name: ENERGY_BONUS_BUILDING.to_owned(),
                 level: 0,
                 fortress_id: fortress.id,
             },
@@ -448,7 +448,7 @@ impl FortressService for MyFortressService {
         let collect_request = CollectFortressResourceRequest {
             id: fortress_id,
             resource: ResourceKind::Gold as i32,
-            bonus_building_name: GOLD_BONUS_BUILDING.to_string(),
+            bonus_building_name: GOLD_BONUS_BUILDING.to_owned(),
             base: None,
         };
         let fortress = self
@@ -493,7 +493,7 @@ impl FortressService for MyFortressService {
         let collect_request = CollectFortressResourceRequest {
             id: fortress_id,
             resource: ResourceKind::Food as i32,
-            bonus_building_name: FOOD_BONUS_BUILDING.to_string(),
+            bonus_building_name: FOOD_BONUS_BUILDING.to_owned(),
             base: None,
         };
         let fortress = self
@@ -538,7 +538,7 @@ impl FortressService for MyFortressService {
         let collect_request = CollectFortressResourceRequest {
             id: fortress_id,
             resource: ResourceKind::Wood as i32,
-            bonus_building_name: WOOD_BONUS_BUILDING.to_string(),
+            bonus_building_name: WOOD_BONUS_BUILDING.to_owned(),
             base: None,
         };
         let fortress = self
@@ -584,7 +584,7 @@ impl FortressService for MyFortressService {
         let collect_request = CollectFortressResourceRequest {
             id: fortress_id,
             resource: ResourceKind::Energy as i32,
-            bonus_building_name: ENERGY_BONUS_BUILDING.to_string(),
+            bonus_building_name: ENERGY_BONUS_BUILDING.to_owned(),
             base: None,
         };
         let fortress = self

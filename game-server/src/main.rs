@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let crud_server_url =
         std::env::var("CRUD_SERVER_URL").map_err(|e| format!("CRUD_SERVER_URL {e}"))?;
     let auth_url =
-        std::env::var("AUTH_URL").unwrap_or_else(|_| "https://auth.rusty.anclarma.fr".to_string());
+        std::env::var("AUTH_URL").unwrap_or_else(|_| "https://auth.rusty.anclarma.fr".to_owned());
     let issuer_url = std::env::var("ISSUER_URL").unwrap_or_else(|_| auth_url.clone());
 
     info!("Downloading public keys from Rauthy ({auth_url})...");

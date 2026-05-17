@@ -4,16 +4,16 @@ use tracing::info;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let rauthy_url = std::env::var("RAUTHY_URL")
-        .unwrap_or_else(|_| "https://auth.rusty.anclarma.fr".to_string());
+    let rauthy_url =
+        std::env::var("RAUTHY_URL").unwrap_or_else(|_| "https://auth.rusty.anclarma.fr".to_owned());
     let api_key_name =
-        std::env::var("BOOTSTRAP_API_KEY_NAME").unwrap_or_else(|_| "bootstrap".to_string());
+        std::env::var("BOOTSTRAP_API_KEY_NAME").unwrap_or_else(|_| "bootstrap".to_owned());
     let api_key_secret = std::env::var("BOOTSTRAP_API_KEY_SECRET")
         .map_err(|_| "BOOTSTRAP_API_KEY_SECRET must be set")?;
-    let client_id = std::env::var("CLIENT_ID").unwrap_or_else(|_| "rusty-client".to_string());
-    let client_name = std::env::var("CLIENT_NAME").unwrap_or_else(|_| "Rusty Client".to_string());
+    let client_id = std::env::var("CLIENT_ID").unwrap_or_else(|_| "rusty-client".to_owned());
+    let client_name = std::env::var("CLIENT_NAME").unwrap_or_else(|_| "Rusty Client".to_owned());
     let public_url =
-        std::env::var("PUBLIC_URL").unwrap_or_else(|_| "https://rusty.anclarma.fr".to_string());
+        std::env::var("PUBLIC_URL").unwrap_or_else(|_| "https://rusty.anclarma.fr".to_owned());
 
     let client = reqwest::blocking::Client::new();
     let auth_header = format!("API-Key {api_key_name}${api_key_secret}");
