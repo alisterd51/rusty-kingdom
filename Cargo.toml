@@ -47,7 +47,9 @@ leptos = { version = "0.8", features = ["csr"] }
 leptos_router = "0.8"
 leptos_i18n = { version = "0.6", features = ["csr"] }
 leptos_i18n_build = { version = "0.6", features = ["csr"] }
-leptos_oidc = "0.9"
+# TODO: use the official version of leptos_oidc when this MR is merged: https://gitlab.com/kerkmann/leptos_oidc/-/merge_requests/14
+# leptos_oidc = "0.9"
+leptos_oidc = { git = "https://gitlab.com/alisterd51/leptos_oidc.git", branch = "chore/update-dependencies" }
 
 [workspace.lints.rust]
 warnings = "deny"
