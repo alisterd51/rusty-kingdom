@@ -101,12 +101,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .get("access_token")
             .and_then(|v| v.as_str())
             .unwrap_or_default()
-            .to_string();
+            .to_owned();
         let refresh_token = session
             .get("refresh_token")
             .and_then(|v| v.as_str())
             .unwrap_or_default()
-            .to_string();
+            .to_owned();
 
         if access_token.is_empty() {
             println!("Initializing the session...");
@@ -115,7 +115,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .get("access_token")
                 .and_then(|v| v.as_str())
                 .unwrap_or_default()
-                .to_string();
+                .to_owned();
         }
 
         let interceptor = AuthInterceptor {

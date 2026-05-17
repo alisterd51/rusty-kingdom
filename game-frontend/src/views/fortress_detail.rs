@@ -54,7 +54,7 @@ pub fn FortressDetail() -> impl IntoView {
                     {
                         return Ok(None);
                     }
-                    Err(status.message().to_string())
+                    Err(status.message().to_owned())
                 }
             }
         }
