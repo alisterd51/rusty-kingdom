@@ -25,3 +25,12 @@ jobs:
     uses: ./.github/workflows/rust-ci.yaml
     with:
       rust-version: nightly
+
+  taplo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Install Talpo
+        run: curl -fsSL https://github.com/tamasfe/taplo/releases/latest/download/taplo-linux-x86_64.gz | gzip -d - | install -m 755 /dev/stdin /usr/local/bin/taplo
+      - name: Run Talpo
+        run: taplo fmt --check --diff
