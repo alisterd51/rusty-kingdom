@@ -1,15 +1,15 @@
 [workspace]
 resolver = "3"
 members = [
-	"rusty",
-	"crud-client",
-	"crud-server",
-	"game-bot-example",
-	"game-client",
-	"game-frontend",
-	"game-server",
-	"migration",
-	"rauthy-init",
+  "rusty",
+  "crud-client",
+  "crud-server",
+  "game-bot-example",
+  "game-client",
+  "game-frontend",
+  "game-server",
+  "migration",
+  "rauthy-init",
 ]
 
 package.version = "0.12.3"
