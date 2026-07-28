@@ -17,7 +17,7 @@ RUN cargo build --frozen --release --bin=game-server
 
 FROM build-common AS build-game-frontend
 RUN rustup target add wasm32-unknown-unknown
-RUN wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.22.0-beta.1/trunk-$(uname -m)-unknown-linux-gnu.tar.gz | tar -xzf- -C /usr/local/bin
+RUN wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.22.0-beta.2/trunk-$(uname -m)-unknown-linux-gnu.tar.gz | tar -xzf- -C /usr/local/bin
 WORKDIR /game-frontend
 ARG BACKEND_URL="https://rusty.anclarma.fr"
 ARG FRONTEND_URL="https://rusty.anclarma.fr"
