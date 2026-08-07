@@ -25,7 +25,7 @@ jobs:
           toolchain: ${{ inputs.rust-version }}
           components: rustfmt
       - name: Cache Rust
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           prefix-key: ${{ inputs.rust-version }}
       - name: Format
@@ -40,7 +40,7 @@ jobs:
         with:
           toolchain: ${{ inputs.rust-version }}
       - name: Cache Rust
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           prefix-key: ${{ inputs.rust-version }}
       - name: install deps
@@ -59,7 +59,7 @@ jobs:
         with:
           toolchain: ${{ inputs.rust-version }}
       - name: Cache Rust
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           prefix-key: ${{ inputs.rust-version }}
       - name: install deps
@@ -85,7 +85,7 @@ jobs:
           toolchain: ${{ inputs.rust-version }}
           components: clippy
       - name: Cache Rust
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           prefix-key: ${{ inputs.rust-version }}
       - name: install deps
@@ -104,7 +104,7 @@ jobs:
         with:
           toolchain: ${{ inputs.rust-version }}
       - name: Cache Rust
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           prefix-key: ${{ inputs.rust-version }}
       - name: install deps
@@ -123,7 +123,7 @@ jobs:
         with:
           toolchain: ${{ inputs.rust-version }}
       - name: Cache Rust
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           prefix-key: ${{ inputs.rust-version }}
       - name: install deps
@@ -142,7 +142,7 @@ jobs:
         with:
           toolchain: ${{ inputs.rust-version }}
       - name: Cache Rust
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           prefix-key: ${{ inputs.rust-version }}
       - name: install deps
