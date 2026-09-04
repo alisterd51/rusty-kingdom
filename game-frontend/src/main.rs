@@ -1,4 +1,4 @@
-#![allow(clippy::must_use_candidate)]
+#![allow(clippy::must_use_candidate, clippy::empty_enums)]
 
 #[allow(clippy::pedantic, clippy::nursery)]
 pub mod pb {
