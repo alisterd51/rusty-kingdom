@@ -17,7 +17,7 @@ RUN cargo build --frozen --release --bin=game-server
 
 FROM build-common AS build-game-frontend
 RUN rustup target add wasm32-unknown-unknown
-RUN wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.22.0-beta.2/trunk-$(uname -m)-unknown-linux-gnu.tar.gz | tar -xzf- -C /usr/local/bin
+RUN wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.22.0-beta.5/trunk-$(uname -m)-unknown-linux-gnu.tar.gz | tar -xzf- -C /usr/local/bin
 WORKDIR /game-frontend
 ARG BACKEND_URL="https://rusty.anclarma.fr"
 ARG FRONTEND_URL="https://rusty.anclarma.fr"
@@ -49,6 +49,6 @@ COPY --from=build-game-server /target/release/game-server /game-server
 EXPOSE 3000
 CMD [ "/game-server" ]
 
-FROM dhi.io/nginx:1.31-alpine3.23 AS runtime-game-frontend
+FROM dhi.io/nginx:1.31-alpine AS runtime-game-frontend
 COPY ./game-frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build-game-frontend /game-frontend/dist /usr/share/nginx/html
