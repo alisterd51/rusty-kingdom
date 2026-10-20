@@ -116,7 +116,7 @@ compose.yaml
 ```yaml
 services:
   postgres:
-    image: dhi.io/postgres:18-alpine3.22
+    image: dhi.io/postgres:18-alpine
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -177,7 +177,7 @@ services:
     depends_on:
       init-acme:
         condition: service_completed_successfully
-    image: dhi.io/traefik:3.6
+    image: dhi.io/traefik:3.7
     restart: always
     ports:
       - "80:80"
@@ -190,7 +190,7 @@ services:
     networks:
       - traefik-network
   rauthy:
-    image: ghcr.io/sebadob/rauthy:0.35.2
+    image: ghcr.io/sebadob/rauthy:0.37.2
     restart: always
     environment:
       ENC_KEYS: ${ENC_KEYS}
