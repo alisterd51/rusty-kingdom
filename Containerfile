@@ -3,17 +3,12 @@ RUN apt-get update && apt-get install -y libpq-dev libssl-dev protobuf-compiler 
 COPY . .
 RUN cargo fetch --locked
 
-FROM build-common AS build-rauthy-init
-RUN cargo build --frozen --release --bin=rauthy-init
-
-FROM build-common AS build-migration
-RUN cargo build --frozen --release --bin=migration
-
-FROM build-common AS build-crud-server
-RUN cargo build --frozen --release --bin=crud-server
-
-FROM build-common AS build-game-server
-RUN cargo build --frozen --release --bin=game-server
+FROM build-common AS build-servers
+RUN cargo build --frozen --release \
+    --bin=rauthy-init \
+    --bin=migration \
+    --bin=crud-server \
+    --bin=game-server
 
 FROM build-common AS build-game-frontend
 RUN rustup target add wasm32-unknown-unknown
@@ -32,20 +27,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 FROM runtime-common-libpq-libssl AS runtime-migration
-COPY --from=build-migration /target/release/migration /migration
+COPY --from=build-servers /target/release/migration /migration
 CMD [ "/migration" ]
 
 FROM runtime-common-libpq-libssl AS runtime-rauthy-init
-COPY --from=build-rauthy-init /target/release/rauthy-init /rauthy-init
+COPY --from=build-servers /target/release/rauthy-init /rauthy-init
 CMD [ "/rauthy-init" ]
 
 FROM runtime-common-libpq-libssl AS runtime-crud-server
-COPY --from=build-crud-server /target/release/crud-server /crud-server
+COPY --from=build-servers /target/release/crud-server /crud-server
 EXPOSE 3000
 CMD [ "/crud-server" ]
 
 FROM dhi.io/debian-base:trixie AS runtime-game-server
-COPY --from=build-game-server /target/release/game-server /game-server
+COPY --from=build-servers /target/release/game-server /game-server
 EXPOSE 3000
 CMD [ "/game-server" ]
 

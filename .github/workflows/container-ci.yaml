@@ -8,22 +8,13 @@ on:
         type: string
 
 env:
-  ARCHITECTURES: amd64 arm64
+  CONTAINERS: "crud-server game-server game-frontend migration rauthy-init"
 
 jobs:
   container-build:
     strategy:
       fail-fast: false
       matrix:
-        container:
-          - crud-server
-          - game-server
-          - game-frontend
-          - migration
-          - rauthy-init
-        arch:
-          - amd64
-          - arm64
         include:
           - arch: amd64
             runner: ubuntu-26.04
@@ -50,29 +41,20 @@ jobs:
           registry: dhi.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push ${{ matrix.container }} (${{ matrix.arch }})
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+      - name: Build and push all containers (${{ matrix.arch }})
+        uses: docker/bake-action@v6
+        env:
+          TAG: ${{ inputs.tag }}
+          ARCH_SUFFIX: -${{ matrix.arch }}
         with:
-          context: .
-          file: Containerfile
-          target: runtime-${{ matrix.container }}
-          platforms: linux/${{ matrix.arch }}
+          files: docker-bake.hcl
           push: true
-          tags: |
-            ghcr.io/alisterd51/rusty-${{ matrix.container }}:${{ inputs.tag }}-${{ matrix.arch }}
+          set: |
+            *.platform=linux/${{ matrix.arch }}
 
   container-manifest:
     needs: container-build
     runs-on: ubuntu-26.04
-    strategy:
-      fail-fast: false
-      matrix:
-        container:
-          - crud-server
-          - game-server
-          - game-frontend
-          - migration
-          - rauthy-init
     permissions:
       contents: read
       packages: write
@@ -85,15 +67,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create and push manifest
+      - name: Create and push manifests
         env:
-          CONTAINER_NAME: ${{ matrix.container }}
           IMAGE_TAG: ${{ inputs.tag }}
         run: |
-          IMAGES=()
-          IFS=' ' read -r -a ARCH_ARRAY <<< "$ARCHITECTURES"
-          for arch in "${ARCH_ARRAY[@]}"; do
-            IMAGES+=("ghcr.io/alisterd51/rusty-${CONTAINER_NAME}:${IMAGE_TAG}-$arch")
+          for container in $CONTAINERS; do
+            docker buildx imagetools create \
+              -t ghcr.io/alisterd51/rusty-${container}:${IMAGE_TAG} \
+              -t ghcr.io/alisterd51/rusty-${container}:latest \
+              ghcr.io/alisterd51/rusty-${container}:${IMAGE_TAG}-amd64 \
+              ghcr.io/alisterd51/rusty-${container}:${IMAGE_TAG}-arm64
           done
-          docker buildx imagetools create -t ghcr.io/alisterd51/rusty-${CONTAINER_NAME}:${IMAGE_TAG} "${IMAGES[@]}"
-          docker buildx imagetools create -t ghcr.io/alisterd51/rusty-${CONTAINER_NAME}:latest "${IMAGES[@]}"
