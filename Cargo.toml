@@ -12,7 +12,7 @@ members = [
   "rauthy-init",
 ]
 
-package.version = "0.12.5"
+package.version = "0.12.6"
 package.edition = "2024"
 
 [workspace.dependencies]
@@ -41,7 +41,7 @@ tonic-prost-build = "0.14"
 reqwest = { version = "0.13", features = ["blocking", "json"] }
 tower-http = { version = "0.7", features = ["cors"] }
 # JWT
-jsonwebtoken = { version = "11", features = ["aws_lc_rs"] }
+jsonwebtoken = "11"
 # leptos
 leptos = { version = "0.8", features = ["csr"] }
 leptos_router = "0.8"

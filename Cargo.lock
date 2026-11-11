@@ -169,7 +169,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "048006790404103c488e6c5616b3e7e702a71292aadda08e8f7698a9e0d2eb53"
 dependencies = [
  "aws-lc-sys",
- "untrusted 0.7.1",
  "zeroize",
 ]
 
@@ -657,7 +656,7 @@ checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 
 [[package]]
 name = "crud-client"
-version = "0.12.5"
+version = "0.12.6"
 dependencies = [
  "prost",
  "tokio",
@@ -668,7 +667,7 @@ dependencies = [
 
 [[package]]
 name = "crud-server"
-version = "0.12.5"
+version = "0.12.6"
 dependencies = [
  "diesel",
  "prost",
@@ -1301,7 +1300,7 @@ dependencies = [
 
 [[package]]
 name = "game-bot-example"
-version = "0.12.5"
+version = "0.12.6"
 dependencies = [
  "prost",
  "reqwest",
@@ -1314,7 +1313,7 @@ dependencies = [
 
 [[package]]
 name = "game-client"
-version = "0.12.5"
+version = "0.12.6"
 dependencies = [
  "clap",
  "clap_complete",
@@ -1330,7 +1329,7 @@ dependencies = [
 
 [[package]]
 name = "game-frontend"
-version = "0.12.5"
+version = "0.12.6"
 dependencies = [
  "leptos",
  "leptos_i18n",
@@ -1346,7 +1345,7 @@ dependencies = [
 
 [[package]]
 name = "game-server"
-version = "0.12.5"
+version = "0.12.6"
 dependencies = [
  "jsonwebtoken",
  "prost",
@@ -2363,7 +2362,6 @@ version = "11.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e75fe14a82d81e5f5af639997db37d8b96045938a7ac6ab18cdbe1c7467e05e1"
 dependencies = [
- "aws-lc-rs",
  "base64 0.22.1",
  "ed25519-dalek",
  "getrandom 0.2.17",
@@ -2974,7 +2972,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "migration"
-version = "0.12.5"
+version = "0.12.6"
 dependencies = [
  "diesel",
  "diesel_migrations",
@@ -3779,7 +3777,7 @@ dependencies = [
 
 [[package]]
 name = "rauthy-init"
-version = "0.12.5"
+version = "0.12.6"
 dependencies = [
  "reqwest",
  "serde",
@@ -3977,7 +3975,7 @@ dependencies = [
  "cfg-if",
  "getrandom 0.2.17",
  "libc",
- "untrusted 0.9.0",
+ "untrusted",
  "windows-sys 0.52.0",
 ]
 
@@ -4117,7 +4115,7 @@ dependencies = [
  "aws-lc-rs",
  "ring",
  "rustls-pki-types",
- "untrusted 0.9.0",
+ "untrusted",
 ]
 
 [[package]]
@@ -4128,7 +4126,7 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
 name = "rusty"
-version = "0.12.5"
+version = "0.12.6"
 dependencies = [
  "diesel",
 ]
@@ -5272,12 +5270,6 @@ name = "unsafe-libyaml"
 version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "673aac59facbab8a9007c7f6108d11f63b603f7cabff99fabf650fea5c32b861"
-
-[[package]]
-name = "untrusted"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
 
 [[package]]
 name = "untrusted"
