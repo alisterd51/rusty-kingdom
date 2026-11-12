@@ -2793,9 +2793,9 @@ dependencies = [
 
 [[package]]
 name = "leptos_oidc"
-version = "0.10.1"
+version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95330b9af25b8f4901426067047f90e1fa4aeb14d561b33998095d696d95d83d"
+checksum = "f9783bc35472c01c414213bf2fdd89f950ba3a034a32f7a72141e54822269454"
 dependencies = [
  "chrono",
  "codee",
